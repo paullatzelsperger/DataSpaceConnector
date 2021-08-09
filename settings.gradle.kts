@@ -76,7 +76,7 @@ include(":samples:run-from-junit")
 include(":samples:streaming")
 
 // all implementations during/regarding the GaiaX Hackathon should go here:
-include(":samples:gaiax-hackathon-1:ion")
+include(":samples:gaiax-hackathon-1:identity:ion")
 
 // extension points for a connector
 include(":spi")
