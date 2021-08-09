@@ -78,7 +78,6 @@ include(":extensions:iam:distributed-identity:verifiable-credentials")
 include(":extensions:iam:distributed-identity:dummy-credentials-verifier")
 include(":extensions:catalog:catalog-service")
 
-
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
 include(":launchers:junit")
