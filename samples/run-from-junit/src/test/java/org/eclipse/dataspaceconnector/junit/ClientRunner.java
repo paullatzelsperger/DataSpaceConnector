@@ -52,7 +52,7 @@ import static org.eclipse.dataspaceconnector.common.types.Cast.cast;
 @ExtendWith(EdcExtension.class)
 //@Disabled
 public class ClientRunner {
-    private static final String PROVIDER_CONNECTOR = "http://localhost:8181/";
+    private static final String PROVIDER_CONNECTOR = "http://gaiax-hackathon-provider.westeurope.azurecontainer.io:8181/";
     private static final TokenResult US_TOKEN = TokenResult.Builder.newInstance().token("mock-us").build();
     private static final TokenResult EU_TOKEN = TokenResult.Builder.newInstance().token("mock-eu").build();
     private static final DataEntry EU_ARTIFACT = DataEntry.Builder.newInstance().id("test123").build();
