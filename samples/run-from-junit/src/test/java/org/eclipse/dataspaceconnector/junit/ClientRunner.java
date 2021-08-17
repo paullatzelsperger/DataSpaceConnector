@@ -157,7 +157,7 @@ public class ClientRunner {
 
                 @Override
                 public void deprovisioned(TransferProcess process) {
-                    if (process.getId().equals(response.getId())) {
+                    if (!process.getId().equals(response.getId())) {
                         return;
                     }
                     latch.countDown();
