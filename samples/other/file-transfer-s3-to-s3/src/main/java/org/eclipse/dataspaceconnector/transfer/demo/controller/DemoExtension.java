@@ -42,11 +42,9 @@ import static org.eclipse.dataspaceconnector.policy.model.Operator.IN;
 
 public class DemoExtension implements ServiceExtension {
 
-    private Monitor monitor;
-
-    private ServiceExtensionContext context;
-
     public static final String USE_EU_POLICY = "use-eu";
+    private Monitor monitor;
+    private ServiceExtensionContext context;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -79,8 +77,8 @@ public class DemoExtension implements ServiceExtension {
 
         try {
             if (Files.exists(source)) {
-                final File sourceFile = source.toFile();
-                final List<DataEntry> dataEntries = objectMapper.readValue(sourceFile, new TypeReference<>() {
+                File sourceFile = source.toFile();
+                List<DataEntry> dataEntries = objectMapper.readValue(sourceFile, new TypeReference<>() {
                 });
                 dataEntries.forEach(metadataStore::save);
             }

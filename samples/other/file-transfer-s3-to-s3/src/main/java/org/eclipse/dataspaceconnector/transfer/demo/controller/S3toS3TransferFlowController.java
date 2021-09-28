@@ -50,10 +50,10 @@ public class S3toS3TransferFlowController implements DataFlowController {
     @Override
     public @NotNull DataFlowInitiateResponse initiateFlow(DataRequest dataRequest) {
 
-        final String sourceKey = dataRequest.getDataEntry().getCatalogEntry().getAddress()
+        String sourceKey = dataRequest.getDataEntry().getCatalogEntry().getAddress()
                 .getKeyName();
 
-        final String sourceBucketName = dataRequest.getDataEntry().getCatalogEntry().getAddress()
+        String sourceBucketName = dataRequest.getDataEntry().getCatalogEntry().getAddress()
                 .getProperty(S3BucketSchema.BUCKET_NAME);
 
         var destinationKey = dataRequest.getDataDestination().getKeyName();
@@ -68,12 +68,12 @@ public class S3toS3TransferFlowController implements DataFlowController {
 
     @NotNull
     private DataFlowInitiateResponse copyToBucket(
-            final String sourceBucketName,
-            final String sourceKey,
-            final String destinationBucketName,
-            final String destinationKey,
-            final String region,
-            final AwsTemporarySecretToken dt
+            String sourceBucketName,
+            String sourceKey,
+            String destinationBucketName,
+            String destinationKey,
+            String region,
+            AwsTemporarySecretToken dt
     ) {
         try (S3Client s3 = S3Client.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(AwsSessionCredentials.create(dt.getAccessKeyId(), dt.getSecretAccessKey(), dt.getSessionToken())))
@@ -85,7 +85,7 @@ public class S3toS3TransferFlowController implements DataFlowController {
             try {
                 monitor.debug("Data request: begin transfer...");
 
-                final CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
+                CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
                         .copySource(sourceBucketName + "/" + sourceKey)
                         .destinationBucket(destinationBucketName)
                         .destinationKey(destinationKey)

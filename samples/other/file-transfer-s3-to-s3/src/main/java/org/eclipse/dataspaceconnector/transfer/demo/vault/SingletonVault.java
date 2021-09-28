@@ -20,27 +20,27 @@ import org.jetbrains.annotations.Nullable;
 
 public class SingletonVault implements Vault {
 
-    public SingletonVault(String secret) {
-        this.secrets = secret;
-    }
-
     private final String secrets;
 
+    public SingletonVault(String secret) {
+        secrets = secret;
+    }
+
     @Override
-    public @Nullable String resolveSecret(final String key) {
+    public @Nullable String resolveSecret(String key) {
         return secrets;
     }
 
     @Override
     public VaultResponse storeSecret(
-            final String key, final String value
+            String key, String value
     ) {
         // NOTE: Intentionally do nothing
         return VaultResponse.OK;
     }
 
     @Override
-    public VaultResponse deleteSecret(final String key) {
+    public VaultResponse deleteSecret(String key) {
         // NOTE: Intentionally do nothing
         return VaultResponse.OK;
     }
