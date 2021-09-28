@@ -2,6 +2,8 @@ package org.eclipse.dataspaceconnector.verifiablecredential;
 
 import com.nimbusds.jose.jwk.ECKey;
 import org.eclipse.dataspaceconnector.iam.did.spi.resolution.DidPublicKeyResolver;
+import org.eclipse.dataspaceconnector.ion.crypto.EcPrivateKeyWrapper;
+import org.eclipse.dataspaceconnector.ion.crypto.IonDidPublicKeyResolver;
 import org.eclipse.dataspaceconnector.ion.spi.IonClient;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
