@@ -35,8 +35,6 @@ public class ProhibitFinalModifier extends AbstractCheck {
 
                 DetailAST nameAst = ast.findFirstToken(TokenTypes.IDENT);
                 String name = nameAst.getText();
-                var colNo = ast.findFirstToken(TokenTypes.MODIFIERS).findFirstToken(TokenTypes.FINAL).getColumnNo();
-
                 log(ast, format("Found method parameter declared as final: \"final %s %s\"", typeAst.getText(), name));
             }
         } else if (ast.getType() == TokenTypes.VARIABLE_DEF && checkLocalVariables) {
@@ -46,7 +44,6 @@ public class ProhibitFinalModifier extends AbstractCheck {
                 DetailAST nameAst = ast.findFirstToken(TokenTypes.IDENT);
                 String name = nameAst.getText();
 
-                var colNo = ast.findFirstToken(TokenTypes.MODIFIERS).findFirstToken(TokenTypes.FINAL).getColumnNo();
                 log(ast, format("Found local variable declared as final: \"final %s %s\"", typeAst.getText(), name));
             }
         }
