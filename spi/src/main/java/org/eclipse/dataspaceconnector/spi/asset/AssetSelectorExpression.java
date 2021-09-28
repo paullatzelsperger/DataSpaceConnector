@@ -26,16 +26,16 @@ import java.util.Optional;
 public final class AssetSelectorExpression {
     private final Map<String, String> filterLabels = new HashMap<>();
 
-    private AssetSelectorExpression(final Map<String, String> filterLabels) {
+    private AssetSelectorExpression(Map<String, String> filterLabels) {
         Optional.ofNullable(filterLabels).ifPresent(this.filterLabels::putAll);
-    }
-
-    public Map<String, String> getFilterLabels() {
-        return Collections.unmodifiableMap(filterLabels);
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public Map<String, String> getFilterLabels() {
+        return Collections.unmodifiableMap(filterLabels);
     }
 
     public static final class Builder {
@@ -44,8 +44,8 @@ public final class AssetSelectorExpression {
         private Builder() {
         }
 
-        public Builder filterByLabel(final String key, final String value) {
-            this.labels.put(key, value);
+        public Builder filterByLabel(String key, String value) {
+            labels.put(key, value);
             return this;
         }
 

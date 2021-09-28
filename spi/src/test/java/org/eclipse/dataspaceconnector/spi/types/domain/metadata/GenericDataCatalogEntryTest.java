@@ -32,7 +32,7 @@ class GenericDataCatalogEntryTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(GenericDataCatalogEntry.class);
 
-        final GenericDataCatalogEntry genericDataCatalogEntry = GenericDataCatalogEntry.Builder.newInstance()
+        GenericDataCatalogEntry genericDataCatalogEntry = GenericDataCatalogEntry.Builder.newInstance()
                 .property("type", "test-type")
                 .property("keyName", "test-key")
                 .property("property", "test-property")
@@ -42,14 +42,14 @@ class GenericDataCatalogEntryTest {
         StringWriter writer = new StringWriter();
         mapper.writeValue(writer, entry);
 
-        final DataEntry deserialized = mapper.readValue(writer.toString(), DataEntry.class);
+        DataEntry deserialized = mapper.readValue(writer.toString(), DataEntry.class);
 
         assertNotNull(deserialized);
-        final DataCatalogEntry catalogEntry = deserialized.getCatalogEntry();
+        DataCatalogEntry catalogEntry = deserialized.getCatalogEntry();
 
         assertTrue(catalogEntry instanceof GenericDataCatalogEntry);
 
-        final DataAddress address = catalogEntry.getAddress();
+        DataAddress address = catalogEntry.getAddress();
 
         assertNotNull(address);
         assertEquals("test-key", address.getKeyName());

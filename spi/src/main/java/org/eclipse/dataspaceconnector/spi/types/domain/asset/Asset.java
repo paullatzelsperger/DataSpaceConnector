@@ -82,57 +82,57 @@ public class Asset {
             return new Builder();
         }
 
-        public Builder id(final String id) {
+        public Builder id(String id) {
             this.id = id;
             return this;
         }
 
 
-        public Builder title(final String title) {
+        public Builder title(String title) {
             this.title = title;
             return this;
         }
 
-        public Builder description(final String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
 
-        public Builder version(final String version) {
+        public Builder version(String version) {
             this.version = version;
             return this;
         }
 
-        public Builder fileName(final String fileName) {
+        public Builder fileName(String fileName) {
             this.fileName = fileName;
             return this;
         }
 
-        public Builder byteSize(final Integer byteSize) {
+        public Builder byteSize(Integer byteSize) {
             this.byteSize = byteSize;
             return this;
         }
 
-        public Builder fileExtension(final String mediaType) {
-            this.fileExtension = mediaType;
+        public Builder fileExtension(String mediaType) {
+            fileExtension = mediaType;
             return this;
         }
 
-        public Builder labels(final Map<String, String> labels) {
+        public Builder labels(Map<String, String> labels) {
             this.labels = labels;
             return this;
         }
 
         public Asset build() {
             Asset asset = new Asset();
-            asset.id = this.id;
-            asset.title = this.title;
-            asset.description = this.description;
-            asset.version = this.version;
-            asset.fileName = this.fileName;
-            asset.byteSize = this.byteSize;
-            asset.fileExtension = this.fileExtension;
-            asset.labels = this.labels;
+            asset.id = id;
+            asset.title = title;
+            asset.description = description;
+            asset.version = version;
+            asset.fileName = fileName;
+            asset.byteSize = byteSize;
+            asset.fileExtension = fileExtension;
+            asset.labels = labels;
             return asset;
         }
     }

@@ -66,7 +66,7 @@ class ContractOfferServiceImplTest {
     @Test
     void testContractOfferFrameworkReturningNullResultsEmptyStream() {
         //given
-        final ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
+        ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
 
         // expect
         EasyMock.expect(contractOfferFramework.queryTemplates(EasyMock.isA(ContractOfferFrameworkQuery.class)))
@@ -75,7 +75,7 @@ class ContractOfferServiceImplTest {
         EasyMock.replay(contractOfferFramework, assetIndex);
 
         // invocation
-        final ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
+        ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
 
         // verification
         assertThat(response).isNotNull();
@@ -87,9 +87,9 @@ class ContractOfferServiceImplTest {
     @Test
     void testContractOfferFrameworkReturningEmptySelectorExpressionResultsEmptyStream() {
         //given
-        final ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
+        ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
 
-        final ContractOfferTemplate contractOfferTemplate = EasyMock.mock(ContractOfferTemplate.class);
+        ContractOfferTemplate contractOfferTemplate = EasyMock.mock(ContractOfferTemplate.class);
 
         // expect
         EasyMock.expect(contractOfferFramework.queryTemplates(EasyMock.isA(ContractOfferFrameworkQuery.class)))
@@ -102,7 +102,7 @@ class ContractOfferServiceImplTest {
         EasyMock.replay(contractOfferFramework, assetIndex, contractOfferTemplate);
 
         // invocation
-        final ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
+        ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
 
         // verification
         assertThat(response).isNotNull();
@@ -114,13 +114,13 @@ class ContractOfferServiceImplTest {
     @Test
     void testFullFlow() {
         //given
-        final ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
+        ContractOfferQuery contractOfferQuery = ContractOfferQuery.builder().build();
 
-        final ContractOfferTemplate contractOfferTemplate = EasyMock.mock(ContractOfferTemplate.class);
-        final AssetSelectorExpression assetSelectorExpression = AssetSelectorExpression.builder().build();
-        final Asset asset = EasyMock.mock(Asset.class);
-        final Stream<Asset> assetStream = Stream.of(asset);
-        final ContractOffer contractOffer = EasyMock.mock(ContractOffer.class);
+        ContractOfferTemplate contractOfferTemplate = EasyMock.mock(ContractOfferTemplate.class);
+        AssetSelectorExpression assetSelectorExpression = AssetSelectorExpression.builder().build();
+        Asset asset = EasyMock.mock(Asset.class);
+        Stream<Asset> assetStream = Stream.of(asset);
+        ContractOffer contractOffer = EasyMock.mock(ContractOffer.class);
 
         // expect
         EasyMock.expect(contractOfferFramework.queryTemplates(
@@ -135,7 +135,7 @@ class ContractOfferServiceImplTest {
         EasyMock.replay(contractOfferFramework, assetIndex, contractOfferTemplate, contractOffer);
 
         // invocation
-        final ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
+        ContractOfferQueryResponse response = contractOfferService.queryContractOffers(contractOfferQuery);
 
         // verification
         assertThat(response).isNotNull();

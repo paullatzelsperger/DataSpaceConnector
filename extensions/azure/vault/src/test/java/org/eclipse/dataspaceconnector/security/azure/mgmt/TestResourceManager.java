@@ -62,18 +62,13 @@ public class TestResourceManager {
                 .create();
     }
 
-    private String getRandomName() {
-        return azureResourceManager.resourceGroups().manager().internalContext().randomResourceName(prefix, 24);
-    }
-
     public void deleteResourceGroup(ResourceGroup rg) {
         logger.info("Deleting Resource Group \"" + rg.name() + "\"");
         azureResourceManager.resourceGroups().deleteByName(rg.name());
     }
 
-
     public Vault deployVault(ResourceGroup rg, String clientId) {
-        final String vaultName = "dataspaceconnector-itest-vault";
+        String vaultName = "dataspaceconnector-itest-vault";
 
         KeyVaultManager kvm = KeyVaultManager.authenticate(credential, profile);
 
@@ -93,5 +88,9 @@ public class TestResourceManager {
 
     public void purgeVault(Vault vault) {
         azureResourceManager.vaults().purgeDeleted(vault.name(), "westeurope");
+    }
+
+    private String getRandomName() {
+        return azureResourceManager.resourceGroups().manager().internalContext().randomResourceName(prefix, 24);
     }
 }

@@ -27,12 +27,12 @@ public class ContractOfferFrameworkQuery {
     private ContractOfferFrameworkQuery() {
     }
 
-    public Principal getPrincipal() {
-        return principal;
-    }
-
     public static Builder builder() {
         return Builder.newInstance();
+    }
+
+    public Principal getPrincipal() {
+        return principal;
     }
 
     public static final class Builder {
@@ -45,14 +45,14 @@ public class ContractOfferFrameworkQuery {
             return new Builder();
         }
 
-        public Builder principal(final Principal principal) {
+        public Builder principal(Principal principal) {
             this.principal = principal;
             return this;
         }
 
         public ContractOfferFrameworkQuery build() {
-            final ContractOfferFrameworkQuery contractOfferFrameworkQuery = new ContractOfferFrameworkQuery();
-            contractOfferFrameworkQuery.principal = this.principal;
+            ContractOfferFrameworkQuery contractOfferFrameworkQuery = new ContractOfferFrameworkQuery();
+            contractOfferFrameworkQuery.principal = principal;
             return contractOfferFrameworkQuery;
         }
     }

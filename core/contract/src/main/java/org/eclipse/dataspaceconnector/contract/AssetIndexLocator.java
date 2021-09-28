@@ -24,7 +24,7 @@ import java.util.Optional;
 class AssetIndexLocator {
     private final ServiceExtensionContext serviceExtensionContext;
 
-    public AssetIndexLocator(final ServiceExtensionContext serviceExtensionContext) {
+    public AssetIndexLocator(ServiceExtensionContext serviceExtensionContext) {
         this.serviceExtensionContext = serviceExtensionContext;
     }
 

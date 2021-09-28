@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 /**
  * The {@link ContractOfferTemplate} resolves {@link ContractOffer}s for a stream of {@link Asset}s.
  * {@link Asset}s are resolved using the {@link AssetSelectorExpression}.
- *
  */
 public interface ContractOfferTemplate {
 

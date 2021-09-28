@@ -35,20 +35,20 @@ public class OfferedAsset {
             return new Builder();
         }
 
-        public Builder policy(final Policy policy) {
+        public Builder policy(Policy policy) {
             this.policy = policy;
             return this;
         }
 
-        public Builder asset(final Asset asset) {
+        public Builder asset(Asset asset) {
             this.asset = asset;
             return this;
         }
 
         public OfferedAsset build() {
-            final OfferedAsset offeredAsset = new OfferedAsset();
-            offeredAsset.asset = Objects.requireNonNull(this.asset);
-            offeredAsset.policy = Objects.requireNonNull(this.policy);
+            OfferedAsset offeredAsset = new OfferedAsset();
+            offeredAsset.asset = Objects.requireNonNull(asset);
+            offeredAsset.policy = Objects.requireNonNull(policy);
             return offeredAsset;
         }
     }

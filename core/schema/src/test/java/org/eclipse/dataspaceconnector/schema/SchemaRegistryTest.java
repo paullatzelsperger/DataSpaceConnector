@@ -35,7 +35,7 @@ public class SchemaRegistryTest {
 
     @Test
     void getSchema_alreadyExists() {
-        final String ident = "test-schema";
+        String ident = "test-schema";
         Schema schema = createSchema(ident);
         schemaRegistry.register(schema);
         assertThat(schemaRegistry.getSchema(ident)).isEqualTo(schema);

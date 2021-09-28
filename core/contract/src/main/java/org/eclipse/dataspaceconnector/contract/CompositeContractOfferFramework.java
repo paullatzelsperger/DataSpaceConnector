@@ -29,28 +29,28 @@ class CompositeContractOfferFramework implements ContractOfferFramework {
     private final Monitor monitor;
 
     public CompositeContractOfferFramework(
-            final ContractOfferFrameworkLocator contractOfferFrameworkLocator,
-            final Monitor monitor) {
+            ContractOfferFrameworkLocator contractOfferFrameworkLocator,
+            Monitor monitor) {
         this.contractOfferFrameworkLocator = contractOfferFrameworkLocator;
         this.monitor = monitor;
     }
 
     @Override
-    public Stream<ContractOfferTemplate> queryTemplates(final ContractOfferFrameworkQuery query) {
+    public Stream<ContractOfferTemplate> queryTemplates(ContractOfferFrameworkQuery query) {
         return Optional.ofNullable(query)
                 .map(this::queryForTemplates)
                 .orElseGet(Stream::empty);
     }
 
     private Stream<ContractOfferTemplate> queryForTemplates(
-            final ContractOfferFrameworkQuery contractOfferFrameworkQuery) {
+            ContractOfferFrameworkQuery contractOfferFrameworkQuery) {
         return contractOfferFrameworkLocator.locate()
                 .stream()
                 .flatMap(prepareInvocation(contractOfferFrameworkQuery));
     }
 
     private Function<ContractOfferFramework, Stream<ContractOfferTemplate>> prepareInvocation(
-            final ContractOfferFrameworkQuery contractOfferFrameworkQuery) {
+            ContractOfferFrameworkQuery contractOfferFrameworkQuery) {
         return contractOfferFramework -> {
             monitor.debug(String.format("Querying %s", contractOfferFramework.getClass().getName()));
             return contractOfferFramework.queryTemplates(contractOfferFrameworkQuery);

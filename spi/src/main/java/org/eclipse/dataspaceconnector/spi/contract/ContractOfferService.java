@@ -21,6 +21,6 @@ public interface ContractOfferService {
 
     // TODO add pagination
     // TODO async. messages
-    ContractOfferQueryResponse queryContractOffers(final ContractOfferQuery contractOfferQuery);
+    ContractOfferQueryResponse queryContractOffers(ContractOfferQuery contractOfferQuery);
 
 }

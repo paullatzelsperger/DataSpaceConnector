@@ -27,9 +27,8 @@ import java.util.List;
 @JsonTypeName("dataspaceconnector:provisionedresourceset")
 @JsonDeserialize(builder = ProvisionedResourceSet.Builder.class)
 public class ProvisionedResourceSet {
-    private String transferProcessId;
-
     private final List<ProvisionedResource> resources = new ArrayList<>();
+    private String transferProcessId;
 
     public String getTransferProcessId() {
         return transferProcessId;

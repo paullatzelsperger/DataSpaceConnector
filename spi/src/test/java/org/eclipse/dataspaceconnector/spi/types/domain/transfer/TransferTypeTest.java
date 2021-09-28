@@ -35,8 +35,7 @@ public class TransferTypeTest {
 
         assertThat(json).contains("\"contentType\":\"someContentType\"");
         assertThat(json).contains("\"isFinite\":false");
-        //noinspection unchecked
-        final Map<String, Object> map = (Map<String, Object>) tm.readValue(json, Map.class);
+        Map<String, Object> map = (Map<String, Object>) tm.readValue(json, Map.class);
         assertThat(map).hasSize(2);
         assertThat(map).containsKey("contentType");
         assertThat(map).containsKey("isFinite");

@@ -8,7 +8,7 @@ class HexStringUtilsTest {
     @Test
     void encodeToHexBytes() {
 
-        final var input = "cd18bb83b12080fae7945d31688f62ad968a7e980feb22642729d104e3097fe2";
+        var input = "cd18bb83b12080fae7945d31688f62ad968a7e980feb22642729d104e3097fe2";
         var expectedOutput = new byte[]{
                 (byte) 205,
                 24,

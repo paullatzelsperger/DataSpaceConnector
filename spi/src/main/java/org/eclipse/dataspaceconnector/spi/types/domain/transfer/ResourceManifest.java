@@ -29,8 +29,8 @@ import java.util.Objects;
 @JsonTypeName("dataspaceconnector:resourcemanifest")
 @JsonDeserialize(builder = ResourceManifest.Builder.class)
 public class ResourceManifest {
-    private String transferProcessId;
     private final List<ResourceDefinition> definitions = new ArrayList<>();
+    private String transferProcessId;
 
     @NotNull
     public List<ResourceDefinition> getDefinitions() {

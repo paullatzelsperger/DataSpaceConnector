@@ -35,10 +35,10 @@ public class DemoContractOfferFrameworkExtension implements ServiceExtension {
     }
 
     @Override
-    public void initialize(final ServiceExtensionContext context) {
+    public void initialize(ServiceExtensionContext context) {
         monitor = context.getMonitor();
 
-        final PublicContractOfferFramework contractOfferFramework = new PublicContractOfferFramework();
+        PublicContractOfferFramework contractOfferFramework = new PublicContractOfferFramework();
 
         context.registerService(ContractOfferFramework.class, contractOfferFramework);
 

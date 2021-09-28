@@ -27,20 +27,20 @@ class CompositeAssetIndex implements AssetIndex {
     private final Monitor monitor;
 
     public CompositeAssetIndex(
-            final AssetIndexLocator assetIndexLocator,
-            final Monitor monitor) {
+            AssetIndexLocator assetIndexLocator,
+            Monitor monitor) {
         this.assetIndexLocator = assetIndexLocator;
         this.monitor = monitor;
     }
 
     @Override
-    public Stream<Asset> queryAssets(final AssetSelectorExpression expression) {
+    public Stream<Asset> queryAssets(AssetSelectorExpression expression) {
         return assetIndexLocator.getAssetIndexes()
                 .stream()
                 .flatMap(prepareInvocation(expression));
     }
 
-    private Function<AssetIndex, Stream<Asset>> prepareInvocation(final AssetSelectorExpression assetSelectorExpression) {
+    private Function<AssetIndex, Stream<Asset>> prepareInvocation(AssetSelectorExpression assetSelectorExpression) {
         return (assetIndex) -> {
             monitor.debug(String.format("Querying %s", assetIndex.getClass().getName()));
             return assetIndex.queryAssets(assetSelectorExpression);

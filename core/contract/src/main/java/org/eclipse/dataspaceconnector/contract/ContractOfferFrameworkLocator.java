@@ -24,7 +24,7 @@ import java.util.Optional;
 class ContractOfferFrameworkLocator {
     private final ServiceExtensionContext serviceExtensionContext;
 
-    public ContractOfferFrameworkLocator(final ServiceExtensionContext serviceExtensionContext) {
+    public ContractOfferFrameworkLocator(ServiceExtensionContext serviceExtensionContext) {
         this.serviceExtensionContext = serviceExtensionContext;
     }
 

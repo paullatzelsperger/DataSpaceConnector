@@ -346,7 +346,7 @@ class CosmosTransferProcessStoreTest {
     @Test
     void delete() {
 
-        final String processId = "test-process-id";
+        String processId = "test-process-id";
         var tp = createTransferProcess(processId);
 
         store.create(tp);
@@ -359,7 +359,7 @@ class CosmosTransferProcessStoreTest {
 
     @Test
     void delete_isLeased_shouldThrowException() {
-        final String processId = "test-process-id";
+        String processId = "test-process-id";
         var tp = createTransferProcess(processId);
         var doc = TransferProcessDocument.from(tp, partitionKey);
         doc.acquireLease("some-other-connector");
@@ -370,7 +370,7 @@ class CosmosTransferProcessStoreTest {
 
     @Test
     void delete_isLeasedBySelf() {
-        final String processId = "test-process-id";
+        String processId = "test-process-id";
         var tp = createTransferProcess(processId);
         var doc = TransferProcessDocument.from(tp, partitionKey);
         doc.acquireLease(connectorId);

@@ -31,12 +31,12 @@ public class ContractOfferQuery {
     private ContractOfferQuery() {
     }
 
-    public Principal getPrincipal() {
-        return principal;
-    }
-
     public static ContractOfferQuery.Builder builder() {
         return ContractOfferQuery.Builder.newInstance();
+    }
+
+    public Principal getPrincipal() {
+        return principal;
     }
 
     public static final class Builder {
@@ -49,14 +49,14 @@ public class ContractOfferQuery {
             return new ContractOfferQuery.Builder();
         }
 
-        public ContractOfferQuery.Builder principal(final Principal principal) {
+        public ContractOfferQuery.Builder principal(Principal principal) {
             this.principal = principal;
             return this;
         }
 
         public ContractOfferQuery build() {
-            final ContractOfferQuery contractOfferQuery = new ContractOfferQuery();
-            contractOfferQuery.principal = this.principal;
+            ContractOfferQuery contractOfferQuery = new ContractOfferQuery();
+            contractOfferQuery.principal = principal;
             return contractOfferQuery;
         }
     }

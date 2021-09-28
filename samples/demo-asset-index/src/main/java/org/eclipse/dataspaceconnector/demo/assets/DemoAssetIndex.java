@@ -35,24 +35,24 @@ public class DemoAssetIndex implements AssetIndex {
             .collect(Collectors.toList());
 
     @Override
-    public Stream<Asset> queryAssets(final AssetSelectorExpression expression) {
+    public Stream<Asset> queryAssets(AssetSelectorExpression expression) {
         return Optional.ofNullable(expression)
                 .map(this::buildPredicate)
                 .map(this::filterAssets)
                 .orElseGet(Stream::empty);
     }
 
-    private Stream<Asset> filterAssets(final Predicate<Asset> assetPredicate) {
+    private Stream<Asset> filterAssets(Predicate<Asset> assetPredicate) {
         return ASSETS.stream().filter(assetPredicate);
     }
 
-    private Predicate<Asset> buildPredicate(final AssetSelectorExpression assetSelectorExpression) {
+    private Predicate<Asset> buildPredicate(AssetSelectorExpression assetSelectorExpression) {
         return buildPredicate(assetSelectorExpression.getFilterLabels());
     }
 
-    private Predicate<Asset> buildPredicate(final Map<String, String> labels) {
+    private Predicate<Asset> buildPredicate(Map<String, String> labels) {
         // bag for collecting all composable predicates
-        final List<Predicate<Asset>> predicates = new LinkedList<>();
+        List<Predicate<Asset>> predicates = new LinkedList<>();
 
         predicates.add(new LabelsPredicate(Optional.ofNullable(labels).orElseGet(Collections::emptyMap)));
 
@@ -64,12 +64,12 @@ public class DemoAssetIndex implements AssetIndex {
     private static class LabelsPredicate implements Predicate<Asset> {
         private final Map<String, String> labels;
 
-        private LabelsPredicate(final Map<String, String> labels) {
+        private LabelsPredicate(Map<String, String> labels) {
             this.labels = labels;
         }
 
         @Override
-        public boolean test(final Asset asset) {
+        public boolean test(Asset asset) {
             // iterate through all labels and check for equality
             // Note: map#equals not usable here!
             labels.entrySet().stream().allMatch(kv -> asset.getLabels().containsKey(kv.getKey()) &&
