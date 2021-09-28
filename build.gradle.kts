@@ -77,6 +77,8 @@ allprojects {
             testImplementation("org.easymock:easymock:4.2")
             testImplementation("org.assertj:assertj-core:3.19.0")
 
+            checkstyle("com.puppycrawl.tools:checkstyle:9.0")
+            checkstyle(files(rootProject.file("edc-checkers.jar")))
         }
 
         publishing {

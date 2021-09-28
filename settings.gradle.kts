@@ -113,3 +113,6 @@ include(":samples:05-file-transfer-cloud:consumer")
 include(":samples:05-file-transfer-cloud:provider")
 include(":samples:05-file-transfer-cloud:api")
 include(":samples:05-file-transfer-cloud:transfer-file")
+
+// other, mostly unrelated stuff
+include(":etc:checkstyle")
