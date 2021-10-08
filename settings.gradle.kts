@@ -73,6 +73,8 @@ include(":extensions:iam:distributed-identity:dummy-credentials-verifier")
 include(":extensions:catalog:catalog-service")
 include(":extensions:catalog:federated-catalog-node")
 include(":extensions:catalog:federated-catalog-cache")
+include(":extensions:catalog:federated-catalog-spi")
+include(":extensions:catalog:federated-catalog-node-directory")
 
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
