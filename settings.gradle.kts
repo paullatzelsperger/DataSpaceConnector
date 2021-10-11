@@ -65,6 +65,8 @@ include(":extensions:in-memory:policy-registry-memory")
 include(":extensions:in-memory:transfer-store-memory")
 include(":extensions:in-memory:did-document-store-inmem")
 include(":extensions:in-memory:identity-hub-memory")
+include(":extensions:in-memory:node-directory-memory")
+include(":extensions:in-memory:fcc-protocol-registry-memory")
 include(":extensions:iam:iam-mock")
 include(":extensions:iam:oauth2")
 include(":extensions:iam:distributed-identity")
@@ -80,7 +82,7 @@ include(":extensions:catalog:catalog-service")
 include(":extensions:catalog:federated-catalog-node")
 include(":extensions:catalog:federated-catalog-cache")
 include(":extensions:catalog:federated-catalog-spi")
-include(":extensions:catalog:federated-catalog-node-directory")
+
 
 // modules for launchers, i.e. runnable compositions of the app
 include(":launchers:basic")
