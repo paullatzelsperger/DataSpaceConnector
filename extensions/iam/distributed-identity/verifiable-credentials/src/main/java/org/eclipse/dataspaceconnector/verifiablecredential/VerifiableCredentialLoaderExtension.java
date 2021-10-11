@@ -25,7 +25,7 @@ public class VerifiableCredentialLoaderExtension implements ServiceExtension {
 
     @Override
     public Set<String> requires() {
-        return Set.of(PrivateKeyResolver.FEATURE, IonClient.FEATURE, DidPublicKeyResolver.FEATURE);
+        return Set.of(IonClient.FEATURE, DidPublicKeyResolver.FEATURE);
     }
 
     @Override
