@@ -28,3 +28,11 @@ publishing {
         }
     }
 }
+publishing {
+    publications {
+        create<MavenPublication>("in-memory.asset-resolver") {
+            artifactId = "in-memory.asset-resolver"
+            from(components["java"])
+        }
+    }
+}
