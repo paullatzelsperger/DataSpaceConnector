@@ -1,18 +1,24 @@
 package org.eclipse.dataspaceconnector.catalog.cache;
 
 import net.jodah.failsafe.RetryPolicy;
+import org.eclipse.dataspaceconnector.catalog.cache.controller.CatalogController;
 import org.eclipse.dataspaceconnector.catalog.cache.crawler.CrawlerImpl;
 import org.eclipse.dataspaceconnector.catalog.cache.loader.LoaderManagerImpl;
 import org.eclipse.dataspaceconnector.catalog.cache.management.PartitionManagerImpl;
+import org.eclipse.dataspaceconnector.catalog.cache.query.DefaultQueryAdapter;
+import org.eclipse.dataspaceconnector.catalog.cache.query.QueryEngineImpl;
 import org.eclipse.dataspaceconnector.catalog.spi.Crawler;
 import org.eclipse.dataspaceconnector.catalog.spi.CrawlerErrorHandler;
 import org.eclipse.dataspaceconnector.catalog.spi.FederatedCacheNodeDirectory;
+import org.eclipse.dataspaceconnector.catalog.spi.FederatedCacheStore;
 import org.eclipse.dataspaceconnector.catalog.spi.LoaderManager;
 import org.eclipse.dataspaceconnector.catalog.spi.PartitionConfiguration;
 import org.eclipse.dataspaceconnector.catalog.spi.ProtocolAdapterRegistry;
+import org.eclipse.dataspaceconnector.catalog.spi.QueryAdapterRegistry;
 import org.eclipse.dataspaceconnector.catalog.spi.WorkItem;
 import org.eclipse.dataspaceconnector.catalog.spi.WorkItemQueue;
 import org.eclipse.dataspaceconnector.catalog.spi.model.UpdateResponse;
+import org.eclipse.dataspaceconnector.spi.protocol.web.WebService;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.jetbrains.annotations.NotNull;
@@ -40,11 +46,22 @@ public class FederatedCatalogCacheExtension implements ServiceExtension {
 
     @Override
     public Set<String> requires() {
-        return Set.of("edc:retry-policy", FederatedCacheNodeDirectory.FEATURE, ProtocolAdapterRegistry.FEATURE);
+        return Set.of("edc:retry-policy", FederatedCacheNodeDirectory.FEATURE, ProtocolAdapterRegistry.FEATURE, QueryAdapterRegistry.FEATURE, "edc:webservice", FederatedCacheStore.FEATURE);
     }
 
     @Override
     public void initialize(ServiceExtensionContext context) {
+        // QUERY SUBSYSTEM
+        var queryAdapterRegistry = context.getService(QueryAdapterRegistry.class);
+
+        FederatedCacheStore store = context.getService(FederatedCacheStore.class);
+        queryAdapterRegistry.register(new DefaultQueryAdapter(store));
+        var webService = context.getService(WebService.class);
+        var queryEngine = new QueryEngineImpl(queryAdapterRegistry);
+        var catalogController = new CatalogController(context.getMonitor(), queryEngine);
+        webService.registerController(catalogController);
+
+        // CRAWLER SUBSYSTEM
         var queue = new ArrayBlockingQueue<UpdateResponse>(DEFAULT_QUEUE_LENGTH);
 
         // protocol registry - must be supplied by another extension
