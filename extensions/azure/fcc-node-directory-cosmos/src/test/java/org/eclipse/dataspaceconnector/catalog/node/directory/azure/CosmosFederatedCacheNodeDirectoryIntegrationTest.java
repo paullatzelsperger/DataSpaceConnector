@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationFunctions.propOrEnv;
 
 @IntegrationTest
-class CosmosFederatedCacheNodeDirectoryTest {
+class CosmosFederatedCacheNodeDirectoryIntegrationTest {
 
     public static final String REGION = "westeurope";
     private static final String ACCOUNT_NAME = "cosmos-itest";

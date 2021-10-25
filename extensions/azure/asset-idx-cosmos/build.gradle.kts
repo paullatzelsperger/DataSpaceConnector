@@ -21,7 +21,6 @@ val cosmosSdkVersion: String by project
 dependencies {
     api(project(":spi"))
     api(project(":common:util"))
-    api(project((":extensions:catalog:federated-catalog-spi")))
     api(project(":extensions:azure:cosmos-common"))
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
 
@@ -31,8 +30,8 @@ dependencies {
 
 publishing {
     publications {
-        create<MavenPublication>("azure.cosmos.fcc-node-dir") {
-            artifactId = "azure.cosmos.fcc-node-dir"
+        create<MavenPublication>("azure.cosmos.asset-idx") {
+            artifactId = "azure.cosmos.asset-idx"
             from(components["java"])
         }
     }
