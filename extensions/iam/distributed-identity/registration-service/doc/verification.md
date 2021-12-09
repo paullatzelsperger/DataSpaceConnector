@@ -9,8 +9,8 @@ This flow adds one step to the flow, i.e. verifying the claims extracted from th
 the `RegistrationService` and its host URL are public knowledge, e.g. through configuration values. If Web-DIDs are
 used, one can be inferred from the other.
 
-In order for this flow to work, the RegistrationService need not provide an `IdentityHub`, and its DID need not contain
-an `IdentityHubUrl`.
+In order for this flow to work, the RegistrationService does not have to provide an `IdentityHub`, and its DID does not
+have to contain an `IdentityHubUrl`, the public key is sufficient.
 
 ## Verification Flow
 
