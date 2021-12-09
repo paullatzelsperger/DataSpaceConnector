@@ -14,8 +14,6 @@
 
 package org.eclipse.dataspaceconnector.transfer.store.cosmos;
 
-import com.azure.cosmos.ConsistencyLevel;
-import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.CosmosScripts;
@@ -31,6 +29,7 @@ import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import net.jodah.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.common.annotations.IntegrationTest;
+import org.eclipse.dataspaceconnector.cosmos.CosmosClientFactory;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
@@ -43,10 +42,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -55,15 +54,14 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationFunctions.propOrEnv;
 import static org.eclipse.dataspaceconnector.transfer.store.cosmos.TestHelper.createTransferProcess;
 
 @IntegrationTest
 class CosmosTransferProcessStoreIntegrationTest {
 
-    private static final String ACCOUNT_NAME = "cosmos-itest";
-    private static final String DATABASE_NAME = "transferprocessstore-itest";
+    private static final String DATABASE_NAME = "transferprocessstore-itest_" + UUID.randomUUID();
     private static final String CONTAINER_PREFIX = "container_";
+
     private static CosmosContainer container;
     private static CosmosDatabase database;
     private final String partitionKey = "testpartition";
@@ -74,18 +72,9 @@ class CosmosTransferProcessStoreIntegrationTest {
     @BeforeAll
     static void prepareCosmosClient() {
 
-        var key = propOrEnv("COSMOS_KEY", null);
-        if (key != null) {
-            var client = new CosmosClientBuilder()
-                    .key(key)
-                    .preferredRegions(Collections.singletonList("westeurope"))
-                    .consistencyLevel(ConsistencyLevel.SESSION)
-                    .endpoint("https://" + ACCOUNT_NAME + ".documents.azure.com:443/")
-                    .buildClient();
-
-            CosmosDatabaseResponse response = client.createDatabaseIfNotExists(DATABASE_NAME);
-            database = client.getDatabase(response.getProperties().getId());
-        }
+        var client = CosmosClientFactory.createDefaultEmulatorClient();
+        CosmosDatabaseResponse response = client.createDatabaseIfNotExists(DATABASE_NAME);
+        database = client.getDatabase(response.getProperties().getId());
     }
 
     @AfterAll
@@ -97,8 +86,8 @@ class CosmosTransferProcessStoreIntegrationTest {
     }
 
     @BeforeEach
-    void setUp() {
-        var containerName = CONTAINER_PREFIX + UUID.randomUUID();
+    void setUp(TestInfo testInfo) {
+        var containerName = CONTAINER_PREFIX + testInfo.getTestMethod();
         assertThat(database).describedAs("CosmosDB database is null - did something go wrong during initialization?").isNotNull();
         CosmosContainerResponse containerIfNotExists = database.createContainerIfNotExists(containerName, "/partitionKey");
         container = database.getContainer(containerIfNotExists.getProperties().getId());

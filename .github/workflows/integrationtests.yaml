@@ -1,15 +1,30 @@
 name: Integration Tests
+on: [ push, pull_request ]
 
-on:
-  push:
-    branches: [ main ]
-  pull_request_target:
+#on:
+#  push:
+#    branches: [ main ]
+#  pull_request_target:
 
 jobs:
   Azure-Integration-Test:
     # run only on upstream repo
-    if: github.repository_owner == 'eclipse-dataspaceconnector'
+    #    if: github.repository_owner == 'eclipse-dataspaceconnector'
     runs-on: ubuntu-latest
+    container: gradle:jdk11
+    services:
+      cosmosdb:
+        image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+        env:
+          AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 2
+          AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: true
+        #          AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE:
+        ports:
+          - 8081:8081
+          - 10251:10251
+          - 10252:10252
+          - 10253:10253
+
 
     steps:
       - uses: actions/checkout@v2
@@ -18,43 +33,83 @@ jobs:
         with:
           java-version: '11'
 
-      - name: Object Storage StatusChecker Test
-        env:
-          RUN_INTEGRATION_TEST: true
-          AZ_STORAGE_SAS: ${{ secrets.AZ_STORAGE_SAS }}
-          AZ_STORAGE_KEY: ${{ secrets.AZ_STORAGE_KEY }}
-        run: ./gradlew extensions:azure:blob:provision:check
+      - name: Setup cosmos emulator
+        run: |
+          mkdir secrets
+          attempt_counter=0
+          max_attempts=20
+          printf 'waiting for cosmos emulator'
+          until $(curl --output /dev/null --silent --max-time 5 --fail -k https://cosmosdb:8081/_explorer/emulator.pem); do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              exit 1
+            fi
 
-      - name: CosmosDB Transfer Process Store Test
-        env:
-          RUN_INTEGRATION_TEST: true
-          COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        run: ./gradlew extensions:azure:transfer-process-store-cosmos:check
+            printf '.'
+            attempt_counter=$(($attempt_counter+1))
+            sleep 5
+          done
 
-      - name: Cosmos-based Asset Index test
-        env:
-          RUN_INTEGRATION_TEST: true
-          COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        run: ./gradlew extensions:azure:assetindex-cosmos:check
-
-
-      - name: Cosmos-based FCN Directory test
-        env:
-          RUN_INTEGRATION_TEST: true
-          COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        run: ./gradlew extensions:azure:fcc-node-directory-cosmos:check
-
-      - name: Cosmos-based ContractDefinitionStore Test
-        env:
-          RUN_INTEGRATION_TEST: true
-          COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        run: ./gradlew extensions:azure:contract-definition-store-cosmos:check
+          curl -k https://cosmosdb:8081/_explorer/emulator.pem > $PWD/secrets/emulatorcert.crt
+          keytool -keystore $PWD/secrets/cacerts -importcert -alias  emulator_cert -file $PWD/secrets/emulatorcert.crt -noprompt -storepass edcRocksBalls123 -trustcacerts
 
       - name: Cosmos-based ContractNegotiationStore Test
+        continue-on-error: true
         env:
           RUN_INTEGRATION_TEST: true
-          COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        run: ./gradlew extensions:azure:contract-negotiation-store-cosmos:check
+          EDC_COSMOS_EMULATOR_TRUSTSTORE: ${{ github.workspace }}/secrets/cacerts
+          EDC_COSMOS_EMULATOR_HOST: https://cosmosdb:8081
+          EDC_COSMOS_EMULATOR_TRUSTSTORE_PASSWORD: edcRocksBalls123
+        run: |
+          ls -lnahs $PWD/secrets
+          export
+          ./gradlew extensions:azure:contract-negotiation-store-cosmos:check
+
+
+      - name: Cosmos-based Asset Index test
+        continue-on-error: true
+        env:
+          RUN_INTEGRATION_TEST: true
+          EDC_COSMOS_EMULATOR_TRUSTSTORE: ${{ github.workspace }}/secrets/cacerts
+          EDC_COSMOS_EMULATOR_HOST: https://cosmosdb:8081
+          EDC_COSMOS_EMULATOR_TRUSTSTORE_PASSWORD: edcRocksBalls123
+        run: |
+          ls -lnahs $PWD/secrets
+          export
+          ./gradlew extensions:azure:assetindex-cosmos:check
+
+      #      - name: Object Storage StatusChecker Test
+      #        env:
+      #          RUN_INTEGRATION_TEST: true
+      #          AZ_STORAGE_SAS: ${{ secrets.AZ_STORAGE_SAS }}
+      #          AZ_STORAGE_KEY: ${{ secrets.AZ_STORAGE_KEY }}
+      #        run: ./gradlew extensions:azure:blob:provision:check
+
+      #      - name: CosmosDB Transfer Process Store Test
+      #        env:
+      #          RUN_INTEGRATION_TEST: true
+      #          EDC_COSMOS_EMULATOR_TRUSTSTORE: $PWD/extensions/azure/cosmos-common/secrets/cacert
+      #          #EDC_COSMOS_EMULATOR_HOST: https://localhost:8081
+      #        run: ./gradlew extensions:azure:transfer-process-store-cosmos:check
+
+
+
+
+  #      - name: Cosmos-based FCN Directory test
+  #        env:
+  #          RUN_INTEGRATION_TEST: true
+  #          EDC_COSMOS_EMULATOR_TRUSTSTORE: $PWD/extensions/azure/cosmos-common/secrets/cacert
+  #          #EDC_COSMOS_EMULATOR_HOST: https://localhost:8081
+  #          run: ./gradlew extensions:azure:fcc-node-directory-cosmos:check
+  #
+  #      - name: Cosmos-based ContractDefinitionStore Test
+  #        env:
+  #          RUN_INTEGRATION_TEST: true
+  #          EDC_COSMOS_EMULATOR_TRUSTSTORE: $PWD/extensions/azure/cosmos-common/secrets/cacert
+  #          #EDC_COSMOS_EMULATOR_HOST: https://localhost:8081
+  #        run: ./gradlew extensions:azure:contract-definition-store-cosmos:check
+  #
+
 
   Aws-Integration-Test:
     # run only on upstream repo

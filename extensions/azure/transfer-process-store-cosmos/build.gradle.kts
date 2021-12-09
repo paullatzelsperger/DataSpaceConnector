@@ -24,6 +24,7 @@ dependencies {
     implementation("com.azure:azure-cosmos:${cosmosSdkVersion}")
 
     testImplementation(testFixtures(project(":common:util")))
+    testImplementation(testFixtures(project(":extensions:azure:cosmos-common")))
 }
 
 

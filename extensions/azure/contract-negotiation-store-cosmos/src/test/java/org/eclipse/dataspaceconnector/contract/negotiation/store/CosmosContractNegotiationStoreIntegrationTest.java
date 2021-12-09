@@ -1,7 +1,5 @@
 package org.eclipse.dataspaceconnector.contract.negotiation.store;
 
-import com.azure.cosmos.ConsistencyLevel;
-import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.CosmosScripts;
@@ -13,6 +11,7 @@ import com.azure.cosmos.models.PartitionKey;
 import net.jodah.failsafe.RetryPolicy;
 import org.eclipse.dataspaceconnector.common.annotations.IntegrationTest;
 import org.eclipse.dataspaceconnector.contract.negotiation.store.model.ContractNegotiationDocument;
+import org.eclipse.dataspaceconnector.cosmos.CosmosClientFactory;
 import org.eclipse.dataspaceconnector.cosmos.azure.CosmosDbApi;
 import org.eclipse.dataspaceconnector.cosmos.azure.CosmosDbApiImpl;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
@@ -29,15 +28,12 @@ import org.junit.jupiter.api.TestInfo;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.dataspaceconnector.common.configuration.ConfigurationFunctions.propOrEnv;
 import static org.eclipse.dataspaceconnector.contract.negotiation.store.TestFunctions.generateDocument;
 import static org.eclipse.dataspaceconnector.contract.negotiation.store.TestFunctions.generateNegotiation;
 
@@ -56,15 +52,8 @@ public class CosmosContractNegotiationStoreIntegrationTest {
 
     @BeforeAll
     static void prepareCosmosClient() {
-        var key = propOrEnv("COSMOS_KEY", null);
-        Objects.requireNonNull(key, "COSMOS_KEY cannot be null!");
-        var client = new CosmosClientBuilder()
-                .key(key)
-                .preferredRegions(Collections.singletonList(REGION))
-                .consistencyLevel(ConsistencyLevel.SESSION)
-                .endpoint("https://" + ACCOUNT_NAME + ".documents.azure.com:443/")
-                .buildClient();
 
+        var client = CosmosClientFactory.createDefaultEmulatorClient();
         CosmosDatabaseResponse response = client.createDatabaseIfNotExists(DATABASE_NAME);
         database = client.getDatabase(response.getProperties().getId());
     }
