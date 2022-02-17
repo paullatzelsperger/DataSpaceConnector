@@ -83,6 +83,9 @@ public class FsVaultExtension implements VaultExtension {
         if (!Files.exists(keyStorePath)) {
             throw new EdcException("Key store does not exist: " + KEYSTORE_LOCATION);
         }
+        if (KEYSTORE_PASSWORD == null) {
+            throw new EdcException("No keystore password was specified");
+        }
 
         try (InputStream stream = Files.newInputStream(keyStorePath)) {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
