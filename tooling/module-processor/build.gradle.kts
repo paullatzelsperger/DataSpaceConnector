@@ -18,10 +18,12 @@ plugins {
     `maven-publish`
 }
 
+val flexMarkVersion: String by project
+
 dependencies {
     api(project(":spi:core-spi"))
     api(project(":tooling:module-domain"))
-    implementation("com.vladsch.flexmark:flexmark-all:0.64.0")
+    implementation("com.vladsch.flexmark:flexmark-all:${flexMarkVersion}")
 }
 
 publishing {
