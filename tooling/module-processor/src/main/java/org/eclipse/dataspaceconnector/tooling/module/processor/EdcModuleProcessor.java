@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.tooling.module.processor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.spi.system.Extension;
-import org.eclipse.dataspaceconnector.spi.system.SPI;
+import org.eclipse.dataspaceconnector.spi.system.Spi;
 import org.eclipse.dataspaceconnector.tooling.module.domain.EdcModule;
 import org.eclipse.dataspaceconnector.tooling.module.domain.ModuleType;
 import org.eclipse.dataspaceconnector.tooling.module.processor.introspection.ModuleIntrospector;
@@ -150,7 +150,7 @@ public class EdcModuleProcessor extends AbstractProcessor {
         var extensionElements = environment.getElementsAnnotatedWith(Extension.class);
         if (extensionElements.isEmpty()) {
             // check if it is an SPI
-            var spiElements = environment.getElementsAnnotatedWith(SPI.class);
+            var spiElements = environment.getElementsAnnotatedWith(Spi.class);
             if (spiElements.size() > 1) {
                 var types = spiElements.stream().map(e -> e.asType().toString()).collect(Collectors.joining(", "));
                 processingEnv.getMessager().printMessage(ERROR, "Multiple SPI definitions found in module: " + types);

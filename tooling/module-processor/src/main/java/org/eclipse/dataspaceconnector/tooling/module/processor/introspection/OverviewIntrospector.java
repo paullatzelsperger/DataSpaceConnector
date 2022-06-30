@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.tooling.module.processor.introspection;
 
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import org.eclipse.dataspaceconnector.spi.system.Extension;
-import org.eclipse.dataspaceconnector.spi.system.SPI;
+import org.eclipse.dataspaceconnector.spi.system.Spi;
 import org.eclipse.dataspaceconnector.tooling.module.domain.ModuleType;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,11 +35,11 @@ public class OverviewIntrospector {
 
     /**
      * Generated overview documentation by converting Javadoc to a Markdown representation. For SPI modules, the Javadoc is taken from the <code>package-info.java</code> type
-     * annotated with {@link SPI}. For extensions, the Javadoc is taken from the type annotated with {@link Extension}.
+     * annotated with {@link Spi}. For extensions, the Javadoc is taken from the type annotated with {@link Extension}.
      */
     @Nullable
     public String generateModuleOverview(ModuleType moduleType, RoundEnvironment environment) {
-        var annotation = moduleType == ModuleType.EXTENSION ? Extension.class : SPI.class;
+        var annotation = moduleType == ModuleType.EXTENSION ? Extension.class : Spi.class;
         var elements = environment.getElementsAnnotatedWith(annotation);
         if (elements.isEmpty()) {
             return null;

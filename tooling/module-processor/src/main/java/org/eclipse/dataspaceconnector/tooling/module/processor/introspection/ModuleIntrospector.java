@@ -20,7 +20,7 @@ import org.eclipse.dataspaceconnector.spi.system.Extension;
 import org.eclipse.dataspaceconnector.spi.system.ExtensionPoint;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Provides;
-import org.eclipse.dataspaceconnector.spi.system.SPI;
+import org.eclipse.dataspaceconnector.spi.system.Spi;
 import org.eclipse.dataspaceconnector.tooling.module.domain.ConfigurationSetting;
 import org.eclipse.dataspaceconnector.tooling.module.domain.ModuleType;
 import org.eclipse.dataspaceconnector.tooling.module.domain.Service;
@@ -50,28 +50,28 @@ public class ModuleIntrospector {
     }
 
     /**
-     * Returns the module name set by either the {@link SPI} or {@link Extension} annotation.
+     * Returns the module name set by either the {@link Spi} or {@link Extension} annotation.
      */
     public String getModuleName(ModuleType moduleType, RoundEnvironment environment) {
         if (ModuleType.EXTENSION == moduleType) {
             var extensionElement = environment.getElementsAnnotatedWith(Extension.class).iterator().next();
             return attributeValue(String.class, "value", mirrorFor(Extension.class, extensionElement), elementUtils);
         } else {
-            var extensionElement = environment.getElementsAnnotatedWith(SPI.class).iterator().next();
-            return attributeValue(String.class, "value", mirrorFor(SPI.class, extensionElement), elementUtils);
+            var extensionElement = environment.getElementsAnnotatedWith(Spi.class).iterator().next();
+            return attributeValue(String.class, "value", mirrorFor(Spi.class, extensionElement), elementUtils);
         }
     }
 
     /**
-     * Returns module categories set using either the {@link SPI} or {@link Extension} annotation.
+     * Returns module categories set using either the {@link Spi} or {@link Extension} annotation.
      */
     public List<String> getModuleCategories(ModuleType moduleType, RoundEnvironment environment) {
         if (ModuleType.EXTENSION == moduleType) {
             var extensionElement = environment.getElementsAnnotatedWith(Extension.class).iterator().next();
             return attributeStringValues("categories", mirrorFor(Extension.class, extensionElement), elementUtils);
         } else {
-            var extensionElement = environment.getElementsAnnotatedWith(SPI.class).iterator().next();
-            return attributeStringValues("categories", mirrorFor(SPI.class, extensionElement), elementUtils);
+            var extensionElement = environment.getElementsAnnotatedWith(Spi.class).iterator().next();
+            return attributeStringValues("categories", mirrorFor(Spi.class, extensionElement), elementUtils);
         }
     }
 
