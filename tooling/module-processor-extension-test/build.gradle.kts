@@ -27,6 +27,7 @@ tasks.withType<JavaCompile> {
     compilerArgs.add("-Aedc.version=${project.version}")
     compilerArgs.add("-Aedc.id=${project.group}:${project.name}")
     compilerArgs.add("-Aedc.location=${project.java.sourceSets.test.get().java.destinationDirectory.get()}")
+    outputs.upToDateWhen { false }
 }
 
 
