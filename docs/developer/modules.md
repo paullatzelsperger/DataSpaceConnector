@@ -122,3 +122,17 @@ org.eclipse.dataspaceconnector:identity-did-web:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:oauth2-core:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:oauth2-spi:0.0.1-SNAPSHOT
 org.eclipse.dataspaceconnector:apache-commons-pool-sql:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:policy-store-cosmos:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:transfer-process-store-cosmos:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:data-plane-azure-data-factory:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:data-plane-azure-storage:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:dummy-credentials-verifier:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-common-test:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-did-core:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-did-crypto:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-did-service:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-did-spi:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:identity-did-web:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:oauth2-core:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:oauth2-spi:0.0.1-SNAPSHOT
+org.eclipse.dataspaceconnector:apache-commons-pool-sql:0.0.1-SNAPSHOT
