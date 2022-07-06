@@ -52,3 +52,4 @@ jobs:
             {
               "VERSION": "${{ env.EDC_VERSION }}"
             }
+          job_timeout: "3600" # Default 30 sec. (optional)
