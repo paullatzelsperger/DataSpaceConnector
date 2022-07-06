@@ -1,4 +1,4 @@
-name: Release Version
+name: Create EDC Release
 on:
   workflow_dispatch:
     inputs:
