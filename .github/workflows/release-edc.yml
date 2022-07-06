@@ -9,7 +9,7 @@ on:
 
 
 env:
-  EDC_VERSION: ${{ github.event.inputs.edc_version || inputs.edc_version }}
+  EDC_VERSION: "v{{ github.event.inputs.edc_version || inputs.edc_version }}"
 
 jobs:
   Prepare-Release:
@@ -27,7 +27,7 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/v${{ env.EDC_VERSION }}',
+              ref: 'refs/tags/${{ env.EDC_VERSION }}',
               sha: context.sha
             })
 
@@ -38,4 +38,4 @@ jobs:
           github_token: ${{ github.token }}
           source_ref: ${{ github.ref }}
           target_branch: 'releases'
-          commit_message_template: 'Merge commit '
+          commit_message_template: 'Merge commit for version ${{ env.EDC_VERSION }}'
