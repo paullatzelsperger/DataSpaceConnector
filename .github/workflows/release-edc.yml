@@ -1,0 +1,35 @@
+name: Release Version
+on:
+  workflow_dispatch:
+    inputs:
+      edc_version:
+        description: 'Version string that is used for publishing. Appending -SNAPSHOT will create a snapshot release.'
+        required: true
+        type: string
+
+
+env:
+  EDC_VERSION: ${{ github.event.inputs.edc_version || inputs.edc_version }}
+
+jobs:
+  Prepare-Release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: releases
+
+      # create tag
+      - name: Create tag on current branch (main)
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: 'v${{ env.EDC_VERSION }}'
+          message: 'Release ${{ env.EDC_VERSION }}'
+
+      # create merge commit
+      - name: Merge main -> releases
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: releases
+          github_token: ${{ secrets.GITHUB_TOKEN }}
