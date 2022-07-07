@@ -38,10 +38,11 @@ jobs:
           github_token: ${{ github.token }}
           source_ref: ${{ github.ref }}
           target_branch: 'releases'
-          commit_message_template: 'Merge commit for version v${{ env.EDC_VERSION }}'
+          commit_message_template: 'Merge commit for release of version v${{ env.EDC_VERSION }}'
 
       # Trigger EF Jenkins
       - name: Trigger Release on EF Jenkins
+        if: ${{ false }}
         uses: toptal/jenkins-job-trigger-action@master
         with:
           jenkins_url: "https://ci.eclipse.org/dataspaceconnector/"

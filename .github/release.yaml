@@ -1,0 +1,16 @@
+changelog:
+  exclude:
+    labels:
+      - no-changelog
+    authors:
+      - dependabot[bot]
+  categories:
+    - title: Bugs
+      labels:
+        - bug
+    - title: New Features & Improvements
+      labels:
+        - "*"
+    - title: Documentation
+      labels:
+        - documentation
