@@ -57,7 +57,7 @@ jobs:
 
 
   Github-Release:
-    if:  ${{ !endsWith( (github.event.inputs.edc_version || inputs.edc_version), '-SNAPSHOT') }}
+    if:  ${{ !endsWith( env.EDC_VERSION, '-SNAPSHOT') }}
     needs:
       - Prepare-Release
     runs-on: ubuntu-latest
