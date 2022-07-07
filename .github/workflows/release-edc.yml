@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       edc_version:
-        description: 'Version string that is used for publishing. Appending -SNAPSHOT will create a snapshot release.'
+        description: 'Version string that is used for publishing (e.g. "1.0.0", NOT "v1.0.0"). Appending -SNAPSHOT will create a snapshot release.'
         required: true
         type: string
 
@@ -42,7 +42,6 @@ jobs:
       # module is signed individually, and parallelism is not available. Hence, the increased timeout of 3600 seconds.
       # There is no way to cancel the process on Jenkins from withing GitHub.
       - name: Trigger Release on EF Jenkins
-        if: ${{ false }}
         uses: toptal/jenkins-job-trigger-action@master
         with:
           jenkins_url: "https://ci.eclipse.org/dataspaceconnector/"
@@ -54,10 +53,12 @@ jobs:
               "VERSION": "${{ env.EDC_VERSION }}"
             }
           job_timeout: "3600" # Default 30 sec. (optional)
-
+    outputs:
+      edc-version: ${{ env.EDC_VERSION }}
 
   Github-Release:
-    if:  ${{ !endsWith( env.EDC_VERSION, '-SNAPSHOT') }}
+    # cannot use the workflow-level env yet as it does not yet exist, must take output from previous job
+    if:  ${{ !endsWith( needs.Prepare-Release.outputs.edc-version), '-SNAPSHOT') }}
     needs:
       - Prepare-Release
     runs-on: ubuntu-latest
