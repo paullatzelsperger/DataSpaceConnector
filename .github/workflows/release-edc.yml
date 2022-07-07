@@ -42,7 +42,7 @@ jobs:
       # module is signed individually, and parallelism is not available. Hence, the increased timeout of 3600 seconds.
       # There is no way to cancel the process on Jenkins from withing GitHub.
       - name: Trigger Release on EF Jenkins
-        if: never()
+        if: ${{ false }}
         uses: toptal/jenkins-job-trigger-action@master
         with:
           jenkins_url: "https://ci.eclipse.org/dataspaceconnector/"
@@ -57,7 +57,7 @@ jobs:
 
 
   Github-Release:
-    if: ! endsWith(${{ env.EDC_VERSION }}, '-SNAPSHOT')
+    if:  ${{ !endsWith( (github.event.inputs.edc_version || inputs.edc_version), '-SNAPSHOT') }}
     needs:
       - Prepare-Release
     runs-on: ubuntu-latest
