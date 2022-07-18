@@ -20,7 +20,9 @@ import org.eclipse.dataspaceconnector.tooling.module.domain.EdcModule;
 import org.eclipse.dataspaceconnector.tooling.module.domain.ServiceReference;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +37,9 @@ class EdcModuleProcessorExtensionTest {
 
     @Test
     void verify() throws IOException {
-        var url = getClass().getResource("/edc.json");
+        var userdir = System.getProperty("user.dir"); //will point to the module's directory
+        var file = userdir + File.separator + "build" + File.separator + "edc.json";
+        var url = Paths.get(file).toUri().toURL();
         assertThat(url).isNotNull();
 
         try (var stream = url.openStream()) {

@@ -23,10 +23,10 @@ dependencies {
 }
 
 tasks.withType<JavaCompile> {
-	val compilerArgs = options.compilerArgs
+    val compilerArgs = options.compilerArgs
     compilerArgs.add("-Aedc.version=${project.version}")
     compilerArgs.add("-Aedc.id=${project.group}:${project.name}")
-    compilerArgs.add("-Aedc.location=${project.java.sourceSets.test.get().java.destinationDirectory.get()}")
+    compilerArgs.add("-Aedc.location=${project.projectDir.absolutePath}/build")
 }
 
 

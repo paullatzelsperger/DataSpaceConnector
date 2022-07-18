@@ -45,15 +45,16 @@ import static javax.tools.Diagnostic.Kind.NOTE;
 
 /**
  * Generates an EDC module manifest by introspecting a set of bounded artifacts.
- *
- * Two processor parameters must be set: {@link #ID} which by convention uses Maven group id an artifact id coordinates; and {@link #VERSION}. To Override the location where the
- * manifest is generated, specify {@link #EDC_LOCATION_OVERRIDE} as a processor parameter.
+ * <p>
+ * Two processor parameters must be set: {@link #ID} which by convention uses Maven group id an artifact id coordinates;
+ * and {@link #VERSION}. To Override the location where the manifest is generated, specify
+ * {@link #EDC_LOCATION_OVERRIDE} as a processor parameter.
  */
 @SupportedAnnotationTypes({
         "org.eclipse.dataspaceconnector.spi.EdcSetting",
         "org.eclipse.dataspaceconnector.spi.EdcSettingContext",
         "org.eclipse.dataspaceconnector.spi.system.Extension",
-        "org.eclipse.dataspaceconnector.spi.system.SPI",
+        "org.eclipse.dataspaceconnector.spi.system.Spi",
         "org.eclipse.dataspaceconnector.spi.system.ExtensionPoint",
         "org.eclipse.dataspaceconnector.spi.system.Provider",
         "org.eclipse.dataspaceconnector.spi.system.Provides",
@@ -61,7 +62,7 @@ import static javax.tools.Diagnostic.Kind.NOTE;
         "org.eclipse.dataspaceconnector.spi.system.Inject",
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-@SupportedOptions({EdcModuleProcessor.ID, EdcModuleProcessor.VERSION})
+@SupportedOptions({ EdcModuleProcessor.ID, EdcModuleProcessor.VERSION })
 public class EdcModuleProcessor extends AbstractProcessor {
     static final String VERSION = "edc.version";
     static final String ID = "edc.id";
@@ -69,7 +70,7 @@ public class EdcModuleProcessor extends AbstractProcessor {
     private static final String MANIFEST_NAME = "edc.json";
     private static final String EDC_LOCATION_OVERRIDE = "edc.location";
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private ModuleIntrospector moduleIntrospector;
 
@@ -120,13 +121,13 @@ public class EdcModuleProcessor extends AbstractProcessor {
 
         var id = processingEnv.getOptions().get(ID);
         if (id == null) {
-            processingEnv.getMessager().printMessage(ERROR, "Value for 'edc.id' not set on processor configuration. Skipping manifest generation.");
+            processingEnv.getMessager().printMessage(ERROR, "Value for '" + ID + "' not set on processor configuration. Skipping manifest generation.");
             return false;
         }
 
         var version = processingEnv.getOptions().get(VERSION);
         if (version == null) {
-            processingEnv.getMessager().printMessage(ERROR, "Value for 'edc.version' not set on processor configuration. Skipping manifest generation.");
+            processingEnv.getMessager().printMessage(ERROR, "Value for '" + VERSION + "' not set on processor configuration. Skipping manifest generation.");
             return false;
         }
 
@@ -174,10 +175,9 @@ public class EdcModuleProcessor extends AbstractProcessor {
 
     private void writeManifest() {
         try {
-            var filer = this.processingEnv.getFiler();
+            var filer = processingEnv.getFiler();
             var location = processingEnv.getOptions().get(EDC_LOCATION_OVERRIDE);
             if (location != null) {
-                //noinspection ResultOfMethodCallIgnored
                 new File(location).mkdirs();
                 try (var writer = new BufferedWriter(new FileWriter(location + File.separator + MANIFEST_NAME))) {
                     mapper.writeValue(writer, List.of(moduleBuilder.build()));
