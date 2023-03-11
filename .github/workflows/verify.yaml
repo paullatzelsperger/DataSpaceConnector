@@ -117,32 +117,20 @@ jobs:
           name: Gatling reports
           path: '**/build/reports/gatling/**'
 
-  Check-Cosmos-Key:
-    runs-on: ubuntu-latest
-    steps:
-      - id: has-cosmos-key
-        env:
-          HAS_COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
-        if: "${{ env.HAS_COSMOS_KEY != '' }}"
-        run: echo "::set-output name=defined::true"
-    outputs:
-      has-cosmos-key: ${{ steps.has-cosmos-key.outputs.defined }}
-
   Azure-CosmosDB-Integration-Tests:
-    # run only if COSMOS_KEY is present
-    #    needs: [ Check-Cosmos-Key ]
-    #    if: needs.Check-Cosmos-Key.outputs.has-cosmos-key == 'true'
-    runs-on: ubuntu-latest
-
+    # run only if COSMOS_KEY is present (https://github.com/orgs/community/discussions/25735)
     env:
       COSMOS_KEY: ${{ secrets.COSMOS_KEY }}
       COSMOS_URL: ${{ secrets.COSMOS_URL }}
+
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-build
 
       - name: Azure CosmosDB Tests
+        if: env.COSMOS_KEY
         uses: ./.github/actions/run-tests
         with:
           command: ./gradlew -p extensions test -DincludeTags="AzureCosmosDbIntegrationTest"
