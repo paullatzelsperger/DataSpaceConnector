@@ -46,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -80,6 +81,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class ProviderContractNegotiationManagerImplTest {
+    private static final String CONSUMER_ID = "consumer";
+    private static final String PROVIDER_ID = "provider";
 
     private static final int RETRY_LIMIT = 1;
     private static final int RETRIES_NOT_EXHAUSTED = RETRY_LIMIT;
@@ -120,7 +123,7 @@ class ProviderContractNegotiationManagerImplTest {
         when(validationService.validateInitialOffer(token, contractOffer)).thenReturn(Result.success(contractOffer));
 
         ContractOfferRequest request = ContractOfferRequest.Builder.newInstance()
-                .connectorId("connectorId")
+                .connectorId(CONSUMER_ID)
                 .connectorAddress("connectorAddress")
                 .protocol("protocol")
                 .contractOffer(contractOffer)
@@ -143,13 +146,13 @@ class ProviderContractNegotiationManagerImplTest {
     }
 
     @Test
-    void requested_declineOffer() {
+    void requested_invalid() {
         var token = ClaimToken.Builder.newInstance().build();
         var contractOffer = contractOffer();
         when(validationService.validateInitialOffer(token, contractOffer)).thenReturn(Result.failure("error"));
 
         ContractOfferRequest request = ContractOfferRequest.Builder.newInstance()
-                .connectorId("connectorId")
+                .connectorId(CONSUMER_ID)
                 .connectorAddress("connectorAddress")
                 .protocol("protocol")
                 .contractOffer(contractOffer)
@@ -158,25 +161,21 @@ class ProviderContractNegotiationManagerImplTest {
 
         var result = negotiationManager.requested(token, request);
 
-        assertThat(result.succeeded()).isTrue();
-        verify(store, atLeastOnce()).save(argThat(n ->
-                n.getState() == ContractNegotiationStates.TERMINATING.code() &&
-                        n.getCounterPartyId().equals(request.getConnectorId()) &&
-                        n.getCounterPartyAddress().equals(request.getConnectorAddress()) &&
-                        n.getProtocol().equals(request.getProtocol()) &&
-                        n.getCorrelationId().equals(request.getCorrelationId()) &&
-                        n.getContractOffers().size() == 1 &&
-                        n.getLastContractOffer().equals(contractOffer)
-        ));
+        assertThat(result.succeeded()).isFalse();
         verify(validationService).validateInitialOffer(token, contractOffer);
     }
 
     @Test
     void verified_shouldTransitToVerifiedState() {
+        var token = ClaimToken.Builder.newInstance().build();
         var negotiation = contractNegotiationBuilder().id("negotiationId").state(PROVIDER_AGREED.code()).build();
-        when(store.find("negotiationId")).thenReturn(negotiation);
 
-        var result = negotiationManager.verified("negotiationId");
+        when(store.find("negotiationId")).thenReturn(negotiation);
+        when(validationService.validateRequest(eq(token), eq(negotiation))).thenReturn(Result.success());
+
+        var result = negotiationManager.verified(token, "negotiationId");
+
+        assertThat(result.succeeded()).isTrue();
 
         assertThat(result).matches(StatusResult::succeeded).extracting(StatusResult::getContent)
                 .satisfies(actual -> assertThat(actual.getState()).isEqualTo(CONSUMER_VERIFIED.code()));
@@ -187,7 +186,7 @@ class ProviderContractNegotiationManagerImplTest {
     void verified_shouldFail_whenNegotiationDoesNotExist() {
         when(store.find("negotiationId")).thenReturn(null);
 
-        var result = negotiationManager.verified("negotiationId");
+        var result = negotiationManager.verified(null, "negotiationId");
 
         assertThat(result).matches(StatusResult::failed);
     }
@@ -199,11 +198,29 @@ class ProviderContractNegotiationManagerImplTest {
         when(store.findForCorrelationId(negotiation.getCorrelationId())).thenReturn(negotiation);
         var token = ClaimToken.Builder.newInstance().build();
 
+        when(validationService.validateRequest(eq(token), eq(negotiation))).thenReturn(Result.success());
+
         var result = negotiationManager.declined(token, negotiation.getCorrelationId());
 
         assertThat(result.succeeded()).isTrue();
         verify(store, atLeastOnce()).save(argThat(n -> n.getState() == TERMINATED.code()));
         verify(listener).terminated(any());
+    }
+
+    @Test
+    void declined_invalid() {
+        var negotiation = createContractNegotiation();
+        when(store.find(negotiation.getId())).thenReturn(negotiation);
+        when(store.findForCorrelationId(negotiation.getCorrelationId())).thenReturn(negotiation);
+        var token = ClaimToken.Builder.newInstance().build();
+
+        when(validationService.validateRequest(eq(token), eq(negotiation))).thenReturn(Result.failure("failure"));
+
+        var result = negotiationManager.declined(token, negotiation.getCorrelationId());
+
+        assertThat(result.succeeded()).isFalse();
+
+        verify(validationService).validateRequest(eq(token), eq(negotiation));
     }
 
     @Test
@@ -463,6 +480,8 @@ class ProviderContractNegotiationManagerImplTest {
                 .id(ContractId.createContractId("1"))
                 .policy(Policy.Builder.newInstance().build())
                 .asset(Asset.Builder.newInstance().id("assetId").build())
+                .consumer(URI.create(CONSUMER_ID))
+                .provider(URI.create(PROVIDER_ID))
                 .contractStart(ZonedDateTime.now())
                 .contractEnd(ZonedDateTime.now())
                 .build();
