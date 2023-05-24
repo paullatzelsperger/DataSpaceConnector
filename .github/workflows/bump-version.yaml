@@ -1,0 +1,47 @@
+---
+name: "Bump version"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        default: 'main'
+        description: "Branch on which the version bump is to be done."
+        required: false
+
+
+jobs:
+  Bump-Version:
+    name: 'Update release version'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: read version from gradle.properties
+        run: |
+          # Prepare git env
+          git config user.name "eclipse-edc-bot"
+          git config user.email "edc-bot@eclipse.org"
+          
+          # checkout target
+          git fetch origin
+          git checkout ${{ inputs.target_branch }}
+          
+          # determine current version
+          oldVersion=$(grep "version" gradle.properties  | awk -F= '{print $2}')
+          
+          # read the major, minor, and patch components, consume -SNAPSHOT
+          IFS=.- read -r RELEASE_VERSION_MAJOR RELEASE_VERSION_MINOR RELEASE_VERSION_PATCH SNAPSHOT<<<"$oldVersion"
+          
+          # construct the new version
+          newVersion="$RELEASE_VERSION_MAJOR.$RELEASE_VERSION_MINOR.$((RELEASE_VERSION_PATCH+1))"-SNAPSHOT
+          
+          # replace version
+          sed -i "s/version=${oldVersion}/version=${newVersion}/g" gradle.properties
+          
+          echo "Bumped the version from $oldVersion to $newVersion"
+          
+          # Commit and push to the desired branch, defaults to 'main'
+          git add gradle.properties
+          git commit --message "Bump version from $oldVersion to $newVersion"
+          
+          git push origin ${{ inputs.target_branch }}
