@@ -30,7 +30,10 @@ import static org.eclipse.edc.validator.spi.Violation.violation;
 
 /**
  * Contains the AssetEntryDto validator definition
+ *
+ * @deprecated this will supersede by {@link AssetValidator}
  */
+@Deprecated(since = "0.1.3", forRemoval = true)
 public class AssetEntryDtoValidator {
 
     public static Validator<JsonObject> assetEntryValidator() {

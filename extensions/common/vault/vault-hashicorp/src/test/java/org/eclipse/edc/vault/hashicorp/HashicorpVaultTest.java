@@ -30,48 +30,94 @@ import static org.mockito.Mockito.when;
 class HashicorpVaultTest {
     private static final String KEY = "key";
 
-    private HashicorpVaultClient vaultHashicorpVaultClient;
+    // mocks
+    private HashicorpVaultClient vaultClient;
     private HashicorpVault vault;
 
     @BeforeEach
     void setup() {
-        vaultHashicorpVaultClient = mock(HashicorpVaultClient.class);
+        vaultClient = mock();
         var monitor = mock(Monitor.class);
-        vault = new HashicorpVault(vaultHashicorpVaultClient, monitor);
+        vault = new HashicorpVault(vaultClient, monitor);
     }
 
     @Test
-    void getSecret() {
-        var value = UUID.randomUUID().toString();
-        var result = Result.success(value);
-        when(vaultHashicorpVaultClient.getSecretValue(KEY)).thenReturn(result);
+    void getSecretSuccess() {
+        // prepare
+        when(vaultClient.getSecretValue(KEY)).thenReturn(Result.success("test-secret"));
 
+        // invoke
         var returnValue = vault.resolveSecret(KEY);
 
-        verify(vaultHashicorpVaultClient, times(1)).getSecretValue(KEY);
-        assertThat(returnValue).isEqualTo(value);
+        // verify
+        verify(vaultClient, times(1)).getSecretValue(KEY);
+        assertThat(returnValue).isEqualTo("test-secret");
     }
 
     @Test
-    void setSecret() {
-        var value = UUID.randomUUID().toString();
-        var result = Result.success(mock(CreateEntryResponsePayload.class));
-        when(vaultHashicorpVaultClient.setSecret(KEY, value)).thenReturn(result);
+    void getSecretFailure() {
+        // prepare
+        when(vaultClient.getSecretValue(KEY)).thenReturn(Result.failure("test-failure"));
 
+        // invoke
+        var returnValue = vault.resolveSecret(KEY);
+
+        // verify
+        verify(vaultClient, times(1)).getSecretValue(KEY);
+        assertThat(returnValue).isNull();
+    }
+
+    @Test
+    void setSecretSuccess() {
+        // prepare
+        var value = UUID.randomUUID().toString();
+        when(vaultClient.setSecret(KEY, value)).thenReturn(Result.success(null));
+
+        // invoke
         var returnValue = vault.storeSecret(KEY, value);
 
-        verify(vaultHashicorpVaultClient, times(1)).setSecret(KEY, value);
+        // verify
+        verify(vaultClient, times(1)).setSecret(KEY, value);
         assertThat(returnValue.succeeded()).isTrue();
     }
 
     @Test
-    void destroySecret() {
-        var result = Result.success();
-        when(vaultHashicorpVaultClient.destroySecret(KEY)).thenReturn(result);
+    void setSecretFailure() {
+        // prepare
+        var value = UUID.randomUUID().toString();
+        when(vaultClient.setSecret(KEY, value)).thenReturn(Result.failure("test-failure"));
 
+        // invoke
+        var returnValue = vault.storeSecret(KEY, value);
+
+        // verify
+        verify(vaultClient, times(1)).setSecret(KEY, value);
+        assertThat(returnValue.failed()).isTrue();
+    }
+
+    @Test
+    void destroySecretSuccess() {
+        // prepare
+        when(vaultClient.destroySecret(KEY)).thenReturn(Result.success());
+
+        // invoke
         var returnValue = vault.deleteSecret(KEY);
 
-        verify(vaultHashicorpVaultClient, times(1)).destroySecret(KEY);
+        // verify
+        verify(vaultClient, times(1)).destroySecret(KEY);
         assertThat(returnValue.succeeded()).isTrue();
+    }
+
+    @Test
+    void destroySecretFailure() {
+        // prepare
+        when(vaultClient.destroySecret(KEY)).thenReturn(Result.failure("test-failure"));
+
+        // invoke
+        var returnValue = vault.deleteSecret(KEY);
+
+        // verify
+        verify(vaultClient, times(1)).destroySecret(KEY);
+        assertThat(returnValue.failed()).isTrue();
     }
 }
