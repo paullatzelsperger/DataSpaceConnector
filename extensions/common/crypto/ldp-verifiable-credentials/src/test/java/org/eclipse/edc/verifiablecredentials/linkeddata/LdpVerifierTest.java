@@ -16,14 +16,17 @@ package org.eclipse.edc.verifiablecredentials.linkeddata;
 
 import com.apicatalog.jsonld.loader.SchemeRouter;
 import com.apicatalog.ld.DocumentError;
+import com.apicatalog.ld.signature.SigningError;
 import com.apicatalog.ld.signature.method.MethodResolver;
 import com.apicatalog.ld.signature.method.VerificationMethod;
+import com.apicatalog.vc.Vc;
 import com.apicatalog.vc.integrity.DataIntegrityProofOptions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import jakarta.json.JsonObject;
 import org.eclipse.edc.iam.identitytrust.spi.verification.SignatureSuiteRegistry;
@@ -31,15 +34,19 @@ import org.eclipse.edc.iam.identitytrust.spi.verification.VerifierContext;
 import org.eclipse.edc.jsonld.TitaniumJsonLd;
 import org.eclipse.edc.security.signature.jws2020.JwkMethod;
 import org.eclipse.edc.security.signature.jws2020.JwsSignature2020Suite;
+import org.eclipse.edc.security.signature.jws2020.JwsSignatureProofOptions;
 import org.eclipse.edc.security.signature.jws2020.TestDocumentLoader;
 import org.eclipse.edc.security.signature.jws2020.TestFunctions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatcher;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
 
@@ -381,6 +388,112 @@ class LdpVerifierTest {
                         .detail().contains("Issuer and proof.verificationMethod mismatch");
             }
 
+
+        }
+
+        @Nested
+        class Generate {
+
+            private JWK issuerKey;
+
+            @BeforeEach
+            void setup() throws ParseException {
+                issuerKey = JWK.parse("""
+                            {"kty":"OKP","d":"riGLTHyP2ahmtKRja6ZHJrmdr1CtHRUWmw74werPw00","crv":"Ed25519","x":"ActoXZWU6HMz4_aWRvS6g7cni0rnutGuSPzWXtnt49U"}
+                        """);
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = { "did:web:localhost%3A7083", "did:web:localhost%3A7093", "did:web:alice-identityhub%3A7083:alice", "did:web:bob-identityhub%3A7083:bob" })
+            void createCredential_membership(String did) throws JsonProcessingException, SigningError, DocumentError {
+                var raw = """
+                        {
+                            "@context": [
+                                "https://www.w3.org/2018/credentials/v1",
+                                "https://w3id.org/security/suites/jws-2020/v1",
+                                "https://www.w3.org/ns/did/v1",
+                                {
+                                  "cx-credentials": "https://w3id.org/catenax/credentials/",
+                                  "membership": "cx-credentials:membership",
+                                  "membershipType": "cx-credentials:membershipType",
+                                  "website": "cx-credentials:website",
+                                  "contact": "cx-credentials:contact",
+                                  "since": "cx-credentials:since"
+                                }
+                            ],
+                            "id": "http://org.yourdataspace.com/credentials/2347",
+                            "type": [
+                                "VerifiableCredential",
+                                "http://org.yourdataspace.com#MembershipCredential"
+                            ],
+                            "issuer": "did:example:dataspace-issuer",
+                            "issuanceDate": "2023-08-18T00:00:00Z",
+                            "credentialSubject": {
+                                "id": "%s",
+                                "membership": {
+                                    "membershipType": "FullMember",
+                                    "website": "www.whatever.com",
+                                    "contact": "mix.max@whatever.com",
+                                    "since": "2023-01-01T00:00:00Z"
+                                }
+                            }
+                        }
+                        """.formatted(did);
+                var jsonDoc = mapper.readValue(raw, JsonObject.class);
+
+                var proofOptions = new JwsSignatureProofOptions(jwsSignatureSuite).verificationMethod(new JwkMethod(URI.create("did:example:dataspace-issuer#key1"), null, null, null))
+                        .purpose(URI.create("https://w3id.org/security#assertionMethod"))
+                        .created(Instant.now());
+
+                var ldKeypair = TestFunctions.createKeyPair(issuerKey);
+                var issuer = Vc.sign(jsonDoc, ldKeypair, proofOptions);
+
+                System.out.println(issuer.getExpanded().toString());
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = { "did:web:localhost%3A7083", "did:web:localhost%3A7093", "did:web:alice-identityhub%3A7083:alice", "did:web:bob-identityhub%3A7083:bob" })
+            void createCredential_pcf(String did) throws JsonProcessingException, SigningError, DocumentError {
+                var raw = """
+                        {
+                            "@context": [
+                                "https://www.w3.org/2018/credentials/v1",
+                                "https://w3id.org/security/suites/jws-2020/v1",
+                                "https://www.w3.org/ns/did/v1",
+                                {
+                                  "cx-credentials": "https://w3id.org/catenax/credentials/",
+                                  "holderIdentifier": "cx-credentials:holderIdentifier",
+                                  "useCaseType": "cx-credentials:useCaseType",
+                                  "contractTemplate": "cx-credentials:contractTemplate",
+                                  "contractVersion": "cx-credentials:contractVersion"
+                                }
+                            ],
+                            "id": "http://org.yourdataspace.com/credentials/2347",
+                            "type": [
+                                "VerifiableCredential",
+                                "http://org.yourdataspace.com#PcfCredential"
+                            ],
+                            "issuer": "did:example:dataspace-issuer",
+                            "issuanceDate": "2023-08-18T00:00:00Z",
+                            "credentialSubject": {
+                                "id": "%s",
+                                "holderIdentifier": "BPN000000XYZ",
+                                "contractTemplate": "https://public.catena-x.org/contracts/pcf.v1.pdf",
+                                "contractVersion": "1.0.0"
+                            }
+                        }
+                        """.formatted(did);
+                var jsonDoc = mapper.readValue(raw, JsonObject.class);
+
+                var proofOptions = new JwsSignatureProofOptions(jwsSignatureSuite).verificationMethod(new JwkMethod(URI.create("did:example:dataspace-issuer#key1"), null, null, null))
+                        .purpose(URI.create("https://w3id.org/security#assertionMethod"))
+                        .created(Instant.now());
+
+                var ldKeypair = TestFunctions.createKeyPair(issuerKey);
+                var issuer = Vc.sign(jsonDoc, ldKeypair, proofOptions);
+
+                System.out.println(issuer.getExpanded().toString());
+            }
         }
     }
 

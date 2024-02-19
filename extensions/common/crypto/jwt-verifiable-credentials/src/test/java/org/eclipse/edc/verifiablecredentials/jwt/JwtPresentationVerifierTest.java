@@ -18,13 +18,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.edc.iam.identitytrust.spi.verification.VerifierContext;
 import org.eclipse.edc.jsonld.util.JacksonJsonLd;
 import org.eclipse.edc.junit.annotations.ComponentTest;
 import org.eclipse.edc.keys.spi.PublicKeyResolver;
+import org.eclipse.edc.security.token.jwt.CryptoConverter;
 import org.eclipse.edc.token.TokenValidationRulesRegistryImpl;
 import org.eclipse.edc.token.TokenValidationServiceImpl;
 import org.eclipse.edc.token.spi.TokenValidationRulesRegistry;
@@ -33,8 +39,14 @@ import org.eclipse.edc.verifiablecredentials.jwt.rules.HasSubjectRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.eclipse.edc.junit.assertions.AbstractResultAssert.assertThat;
 import static org.eclipse.edc.spi.result.Result.success;
@@ -98,6 +110,72 @@ class JwtPresentationVerifierTest {
                 .build();
         var result = verifier.verify(vpJwt, context);
         assertThat(result).isFailed().detail().contains("Either 'vp' or 'vc' claim must be present in JWT.");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "did:web:localhost%3A7083", "did:web:alice-identityhub%3A7083:alice" })
+    void createJwtVcForAlice(String did) throws ParseException, JsonProcessingException {
+        var jwk = JWK.parse("""
+                {"kty":"OKP","d":"riGLTHyP2ahmtKRja6ZHJrmdr1CtHRUWmw74werPw00","crv":"Ed25519","x":"ActoXZWU6HMz4_aWRvS6g7cni0rnutGuSPzWXtnt49U"}
+                """);
+
+        var vc = """
+                {
+                            "@context": [
+                                "https://www.w3.org/2018/credentials/v1",
+                                "https://w3id.org/security/suites/jws-2020/v1",
+                                "https://www.w3.org/ns/did/v1",
+                                {
+                                  "cx-credentials": "https://w3id.org/catenax/credentials/",
+                                  "membership": "cx-credentials:membership",
+                                  "membershipType": "cx-credentials:membershipType",
+                                  "website": "cx-credentials:website",
+                                  "contact": "cx-credentials:contact",
+                                  "since": "cx-credentials:since"
+                                }
+                            ],
+                            "id": "http://org.yourdataspace.com/credentials/2347",
+                            "type": [
+                                "VerifiableCredential",
+                                "http://org.yourdataspace.com#MembershipCredential"
+                            ],
+                            "issuer": "did:example:dataspace-issuer",
+                            "issuanceDate": "2023-08-18T00:00:00Z",
+                            "credentialSubject": {
+                                "id": "%s",
+                                "membership": {
+                                    "membershipType": "FullMember",
+                                    "website": "www.whatever.com",
+                                    "contact": "mix.max@whatever.com",
+                                    "since": "2023-01-01T00:00:00Z"
+                                }
+                            }
+                        }
+                """.formatted(did);
+        try {
+            var signer = CryptoConverter.createSigner(jwk);
+
+            // Prepare JWT with claims set
+            var now = Date.from(Instant.now());
+            var claimsSet = new JWTClaimsSet.Builder()
+                    .issuer("did:example:dataspace-issuer")
+                    .subject(did)
+                    .issueTime(now)
+                    .audience(did)
+                    .notBeforeTime(now)
+                    .claim("jti", UUID.randomUUID().toString())
+                    .expirationTime(Date.from(Instant.now().plusSeconds(60)));
+
+            claimsSet.claim("vc", mapper.readValue(vc, Map.class));
+
+            var signedJwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.EdDSA).keyID("did:example:dataspace-issuer#key1").build(), claimsSet.build());
+
+            signedJwt.sign(signer);
+
+            System.out.println(signedJwt.serialize());
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @DisplayName("VP-JWT does not contain any credential")
