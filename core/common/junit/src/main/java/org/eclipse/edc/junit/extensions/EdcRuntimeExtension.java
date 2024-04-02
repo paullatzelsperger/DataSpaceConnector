@@ -18,6 +18,7 @@ package org.eclipse.edc.junit.extensions;
 import org.eclipse.edc.junit.testfixtures.TestUtils;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
+import org.eclipse.edc.spi.monitor.LogLevel;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -159,7 +160,7 @@ public class EdcRuntimeExtension extends EdcExtension {
             return new Monitor() {
             };
         } else {
-            return new ConsoleMonitor(name, ConsoleMonitor.Level.DEBUG, true);
+            return new ConsoleMonitor(name, LogLevel.DEBUG, true);
         }
     }
 

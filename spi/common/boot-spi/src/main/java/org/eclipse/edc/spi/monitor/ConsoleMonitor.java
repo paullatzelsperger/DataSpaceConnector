@@ -32,7 +32,7 @@ public class ConsoleMonitor implements Monitor {
 
     private final boolean useColor;
 
-    private final Level level;
+    private final LogLevel level;
     private final String prefix;
 
     public ConsoleMonitor() {
@@ -40,14 +40,14 @@ public class ConsoleMonitor implements Monitor {
     }
 
     public ConsoleMonitor(boolean useColor) {
-        this(null, Level.DEBUG, useColor);
+        this(null, LogLevel.DEBUG, useColor);
     }
 
-    public ConsoleMonitor(@Nullable String runtimeName, Level level) {
+    public ConsoleMonitor(@Nullable String runtimeName, LogLevel level) {
         this(runtimeName, level, true);
     }
 
-    public ConsoleMonitor(@Nullable String runtimeName, Level level, boolean useColor) {
+    public ConsoleMonitor(@Nullable String runtimeName, LogLevel level, boolean useColor) {
         this.prefix = runtimeName == null ? "" : "[%s] ".formatted(runtimeName);
         this.level = level;
         this.useColor = useColor;
@@ -60,7 +60,7 @@ public class ConsoleMonitor implements Monitor {
 
     @Override
     public void warning(Supplier<String> supplier, Throwable... errors) {
-        if (Level.WARNING.value < level.value) {
+        if (LogLevel.WARNING.getValue() < level.getValue()) {
             return;
         }
         output(WARNING, supplier, errors);
@@ -68,7 +68,7 @@ public class ConsoleMonitor implements Monitor {
 
     @Override
     public void info(Supplier<String> supplier, Throwable... errors) {
-        if (Level.INFO.value < level.value) {
+        if (LogLevel.INFO.getValue() < level.getValue()) {
             return;
         }
         output(INFO, supplier, errors);
@@ -76,7 +76,7 @@ public class ConsoleMonitor implements Monitor {
 
     @Override
     public void debug(Supplier<String> supplier, Throwable... errors) {
-        if (Level.DEBUG.value < level.value) {
+        if (LogLevel.DEBUG.getValue() < level.getValue()) {
             return;
         }
         output(DEBUG, supplier, errors);
@@ -109,13 +109,4 @@ public class ConsoleMonitor implements Monitor {
         };
     }
 
-    public enum Level {
-        SEVERE(3), WARNING(2), INFO(1), DEBUG(0);
-
-        private final int value;
-
-        Level(int value) {
-            this.value = value;
-        }
-    }
 }

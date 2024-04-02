@@ -18,6 +18,7 @@ package org.eclipse.edc.boot.system;
 import org.eclipse.edc.boot.BootServicesExtension;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.edc.spi.monitor.LogLevelFilter;
 import org.eclipse.edc.spi.system.ConfigurationExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.system.configuration.Config;
@@ -44,7 +45,7 @@ public class DefaultServiceExtensionContext implements ServiceExtensionContext {
     public DefaultServiceExtensionContext(Monitor monitor, List<ConfigurationExtension> configurationExtensions) {
         this.configurationExtensions = configurationExtensions;
         // register as service
-        registerService(Monitor.class, monitor);
+        registerService(Monitor.class, new LogLevelFilter(this, monitor));
     }
 
     @Override
