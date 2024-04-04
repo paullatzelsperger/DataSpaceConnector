@@ -43,6 +43,10 @@ public class ConsoleMonitor implements Monitor {
         this(null, LogLevel.DEBUG, useColor);
     }
 
+    public ConsoleMonitor(boolean useColor, LogLevel level) {
+        this(null, level, useColor);
+    }
+
     public ConsoleMonitor(@Nullable String runtimeName, LogLevel level) {
         this(runtimeName, level, true);
     }

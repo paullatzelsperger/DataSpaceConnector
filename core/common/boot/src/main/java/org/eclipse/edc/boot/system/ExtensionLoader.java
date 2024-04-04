@@ -24,6 +24,7 @@ import org.eclipse.edc.boot.system.injection.ProviderMethod;
 import org.eclipse.edc.boot.system.injection.ProviderMethodScanner;
 import org.eclipse.edc.boot.system.injection.lifecycle.ExtensionLifecycleManager;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
+import org.eclipse.edc.spi.monitor.LogLevel;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.MonitorExtension;
 import org.eclipse.edc.spi.system.ServiceExtension;
@@ -31,11 +32,14 @@ import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ExtensionLoader {
@@ -88,8 +92,9 @@ public class ExtensionLoader {
     }
 
     static @NotNull Monitor loadMonitor(List<MonitorExtension> availableMonitors, String... programArgs) {
+        var level = getLogLevel(Arrays.asList(programArgs));
         if (availableMonitors.isEmpty()) {
-            return new ConsoleMonitor(!Set.of(programArgs).contains("--no-color"));
+            return new ConsoleMonitor(!Set.of(programArgs).contains("--no-color"), level);
         }
 
         if (availableMonitors.size() > 1) {
@@ -97,6 +102,16 @@ public class ExtensionLoader {
         }
 
         return availableMonitors.get(0).getMonitor();
+    }
+
+    private static LogLevel getLogLevel(List<String> programArgs) {
+        var regex = Pattern.compile("^(?<prefix>(--log-level|-l))=(?<level>(debug|info|warning|severe))$");
+        return programArgs.stream().map(regex::matcher)
+                .filter(Matcher::matches)
+                .findFirst()
+                .map(m -> m.group("level").toUpperCase())
+                .map(LogLevel::valueOf)
+                .orElse(LogLevel.INFO);
     }
 
     public static @NotNull Telemetry loadTelemetry() {

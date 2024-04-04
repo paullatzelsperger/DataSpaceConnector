@@ -1,17 +1,33 @@
-package org.eclipse.edc.spi.monitor;
+/*
+ *  Copyright (c) 2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Contributors:
+ *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - initial API and implementation
+ *
+ */
 
-import org.eclipse.edc.spi.system.ServiceExtensionContext;
+package org.eclipse.edc.spi.monitor;
 
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class LogLevelFilter implements Monitor {
-    private final ServiceExtensionContext context;
     private final Monitor wrappedMonitor;
+    private final LogLevel minimumLogLevel;
 
-    public LogLevelFilter(ServiceExtensionContext context, Monitor monitor) {
-        this.context = context;
+    public LogLevelFilter(Monitor monitor) {
+        this(monitor, LogLevel.INFO);
+    }
+
+    public LogLevelFilter(Monitor monitor, LogLevel level) {
         this.wrappedMonitor = monitor;
+        this.minimumLogLevel = level;
     }
 
     @Override
@@ -79,13 +95,10 @@ public class LogLevelFilter implements Monitor {
 
     private boolean isEnabled(LogLevel logLevel) {
         try {
-            var value = context.getConfig().getString("edc.log.level", LogLevel.INFO.toString());
-
-            var configuredLevel = LogLevel.valueOf(value);
-            if (configuredLevel == LogLevel.NONE) {
+            if (minimumLogLevel == LogLevel.NONE) {
                 return false;
             }
-            return configuredLevel.getValue() <= logLevel.getValue();
+            return minimumLogLevel.getValue() <= logLevel.getValue();
         } catch (NullPointerException | IllegalArgumentException e) {
             return true;
         }
