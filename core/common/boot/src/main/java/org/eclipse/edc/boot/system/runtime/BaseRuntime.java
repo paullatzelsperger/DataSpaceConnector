@@ -22,6 +22,7 @@ import org.eclipse.edc.boot.system.ServiceLocator;
 import org.eclipse.edc.boot.system.ServiceLocatorImpl;
 import org.eclipse.edc.boot.system.injection.InjectionContainer;
 import org.eclipse.edc.spi.EdcException;
+import org.eclipse.edc.spi.monitor.LogLevel;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.ConfigurationExtension;
 import org.eclipse.edc.spi.system.MonitorExtension;
@@ -33,7 +34,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
@@ -69,6 +73,23 @@ public class BaseRuntime {
         programArgs = args;
         var runtime = new BaseRuntime();
         runtime.boot();
+    }
+
+    /**
+     * extracts monitor log levels from command line args, defaults to {@link LogLevel#INFO}. syntax: {@code --log-level=(debug|info|warning|severe)}
+     * or {@code -l=(debug|info|warning|severe)}
+     *
+     * @param programArgs program arguments passed in via CLI. non-null.
+     */
+    private static LogLevel getLogLevel(Set<String> programArgs) {
+
+        var regex = Pattern.compile("^(?<prefix>(--log-level|-l))=(?<level>(debug|info|warning|severe))$");
+        return programArgs.stream().map(regex::matcher)
+                .filter(Matcher::matches)
+                .findFirst()
+                .map(m -> m.group("level").toUpperCase())
+                .map(LogLevel::valueOf)
+                .orElse(LogLevel.INFO);
     }
 
     /**
@@ -175,14 +196,17 @@ public class BaseRuntime {
     }
 
     /**
-     * Hook point to instantiate a {@link Monitor}. By default, the runtime instantiates a {@code Monitor} using the Service Loader mechanism, i.e. by calling the {@link ExtensionLoader#loadMonitor(String...)} method.
+     * Hook point to instantiate a {@link Monitor}. By default, the runtime instantiates a {@code Monitor} using the Service Loader mechanism, i.e. by calling the {@link ExtensionLoader#loadMonitor(boolean, LogLevel)} method.
      * <p>
      * Please consider using the extension mechanism (i.e. {@link MonitorExtension}) rather than supplying a custom monitor by overriding this method.
      * However, for development/testing scenarios it might be an easy solution to just override this method.
      */
     @NotNull
     protected Monitor createMonitor() {
-        return ExtensionLoader.loadMonitor(programArgs);
+        var args = Set.of(programArgs);
+        var showColor = !args.contains("--no-color");
+        var logLevel = getLogLevel(args);
+        return ExtensionLoader.loadMonitor(showColor, logLevel);
     }
 
     private void boot(boolean addShutdownHook) {

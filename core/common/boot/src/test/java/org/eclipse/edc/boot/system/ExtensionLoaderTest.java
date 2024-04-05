@@ -29,6 +29,7 @@ import org.eclipse.edc.runtime.metamodel.annotation.Provides;
 import org.eclipse.edc.runtime.metamodel.annotation.Requires;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.monitor.ConsoleMonitor;
+import org.eclipse.edc.spi.monitor.LogLevel;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.MonitorExtension;
 import org.eclipse.edc.spi.system.ServiceExtension;
@@ -45,8 +46,8 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -74,7 +75,7 @@ class ExtensionLoaderTest {
         var exts = new ArrayList<MonitorExtension>();
         exts.add(() -> mockedMonitor);
 
-        var monitor = ExtensionLoader.loadMonitor(exts);
+        var monitor = ExtensionLoader.loadMonitor(exts, false, LogLevel.INFO);
 
         assertEquals(mockedMonitor, monitor);
     }
@@ -85,16 +86,16 @@ class ExtensionLoaderTest {
         exts.add(() -> mock(Monitor.class));
         exts.add(ConsoleMonitor::new);
 
-        var monitor = ExtensionLoader.loadMonitor(exts);
+        var monitor = ExtensionLoader.loadMonitor(exts, false, LogLevel.INFO);
 
-        assertTrue(monitor instanceof MultiplexingMonitor);
+        assertInstanceOf(MultiplexingMonitor.class, monitor);
     }
 
     @Test
     void loadMonitor_whenNoMonitorExtension() {
-        var monitor = ExtensionLoader.loadMonitor(new ArrayList<>());
+        var monitor = ExtensionLoader.loadMonitor(new ArrayList<>(), false, LogLevel.INFO);
 
-        assertTrue(monitor instanceof ConsoleMonitor);
+        assertInstanceOf(ConsoleMonitor.class, monitor);
     }
 
     @Test

@@ -49,7 +49,7 @@ import static org.eclipse.edc.boot.system.ExtensionLoader.loadMonitor;
  * {@link AfterTestExecutionCallback} lifecycle hooks. Parameter injection of runtime services is supported.
  */
 public class EdcRuntimeExtension extends EdcExtension {
-    private static final Monitor MONITOR = loadMonitor();
+    private static final Monitor MONITOR = loadMonitor(true, LogLevel.DEBUG);
 
     private final String name;
     private final Map<String, String> properties;

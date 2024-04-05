@@ -32,14 +32,10 @@ import org.eclipse.edc.spi.system.ServiceExtensionContext;
 import org.eclipse.edc.spi.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ExtensionLoader {
@@ -69,11 +65,11 @@ public class ExtensionLoader {
                 .map(ExtensionLifecycleManager::inject)
                 .map(ExtensionLifecycleManager::initialize)
                 .map(ExtensionLifecycleManager::provide)
-                .collect(Collectors.toList());
+                .toList();
 
         context.freeze();
 
-        var preparedExtensions = lifeCycles.stream().map(ExtensionLifecycleManager::prepare).collect(Collectors.toList());
+        var preparedExtensions = lifeCycles.stream().map(ExtensionLifecycleManager::prepare).toList();
         preparedExtensions.forEach(ExtensionLifecycleManager::start);
     }
 
@@ -86,15 +82,14 @@ public class ExtensionLoader {
         };
     }
 
-    public static @NotNull Monitor loadMonitor(String... programArgs) {
+    public static @NotNull Monitor loadMonitor(boolean showColor, LogLevel logLevel) {
         var loader = ServiceLoader.load(MonitorExtension.class);
-        return loadMonitor(loader.stream().map(ServiceLoader.Provider::get).collect(Collectors.toList()), programArgs);
+        return loadMonitor(loader.stream().map(ServiceLoader.Provider::get).collect(Collectors.toList()), showColor, logLevel);
     }
 
-    static @NotNull Monitor loadMonitor(List<MonitorExtension> availableMonitors, String... programArgs) {
-        var level = getLogLevel(Arrays.asList(programArgs));
+    static @NotNull Monitor loadMonitor(List<MonitorExtension> availableMonitors, boolean showColor, LogLevel logLevel) {
         if (availableMonitors.isEmpty()) {
-            return new ConsoleMonitor(!Set.of(programArgs).contains("--no-color"), level);
+            return new ConsoleMonitor(showColor, logLevel);
         }
 
         if (availableMonitors.size() > 1) {
@@ -102,16 +97,6 @@ public class ExtensionLoader {
         }
 
         return availableMonitors.get(0).getMonitor();
-    }
-
-    private static LogLevel getLogLevel(List<String> programArgs) {
-        var regex = Pattern.compile("^(?<prefix>(--log-level|-l))=(?<level>(debug|info|warning|severe))$");
-        return programArgs.stream().map(regex::matcher)
-                .filter(Matcher::matches)
-                .findFirst()
-                .map(m -> m.group("level").toUpperCase())
-                .map(LogLevel::valueOf)
-                .orElse(LogLevel.INFO);
     }
 
     public static @NotNull Telemetry loadTelemetry() {

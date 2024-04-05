@@ -37,7 +37,6 @@
   </a>
 </div>
 
-
 ### Built with
 
 One of the guiding principles in developing the connector is simplicity and keeping the core small and efficient with as
@@ -132,10 +131,11 @@ Please be aware of the following pitfalls:
 
 #### Using release versions
 
-_We plan to have actual release versions starting some time mid 2022. Please check back soon._
+_We strongly recommend only using official releases._
 
 
-> For more information about versioning please refer to the [release documentation](https://github.com/eclipse-edc/.github/blob/main/docs/developer/releases.md)
+> For more information about versioning please refer to
+> the [release documentation](https://github.com/eclipse-edc/.github/blob/main/docs/developer/releases.md)
 
 ### Checkout and build from source
 
@@ -193,7 +193,7 @@ capabilities a connector has) is defined by the `build.gradle.kts` file inside t
 where a Java class containing a `main` method should go. We will call that class a "runtime" and in order for the
 connector to become operational the `runtime` needs to perform several important tasks (="bootstrapping"). For an
 example take a look at
-[this runtime](https://github.com/eclipse-edc/Samples/blob/main/other/custom-runtime/src/main/java/org/eclipse/edc/sample/runtime/CustomRuntime.java)
+[this runtime](https://github.com/eclipse-edc/Samples/blob/main/advanced/advanced-02-custom-runtime/src/main/java/org/eclipse/edc/sample/runtime/CustomRuntime.java)
 
 ### `data-protocols`
 
@@ -202,11 +202,13 @@ Contains implementations for communication protocols a connector might use, such
 ## Releases
 
 GitHub releases are listed [here](https://github.com/eclipse-edc/Connector/releases).
-Please find more information about releases in our [release approach](https://github.com/eclipse-edc/docs/blob/main/developer/releases.md).
+Please find more information about releases in
+our [release approach](https://github.com/eclipse-edc/docs/blob/main/developer/releases.md).
 
 ### Roadmap
 
-See [here](https://github.com/eclipse-edc/.github/blob/main/CONTRIBUTING.md#project-and-milestone-planning) for more information about project and
+See [here](https://github.com/eclipse-edc/.github/blob/main/CONTRIBUTING.md#project-and-milestone-planning) for more
+information about project and
 milestone planning. Scheduled and ongoing milestones are listed
 [here](https://github.com/eclipse-edc/Connector/milestones).
 
