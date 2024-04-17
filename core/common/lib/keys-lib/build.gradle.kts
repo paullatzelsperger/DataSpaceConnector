@@ -25,7 +25,8 @@ dependencies {
     implementation(libs.nimbus.jwt)
     implementation(libs.tink)
 
-    testImplementation(project(":tests:junit-base"));
+    testImplementation(project(":tests:junit-base"))
+    testImplementation(project(":core:common:lib:crypto-common-lib"))
 
 }
 

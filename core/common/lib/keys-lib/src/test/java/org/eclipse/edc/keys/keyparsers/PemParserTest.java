@@ -16,13 +16,16 @@ package org.eclipse.edc.keys.keyparsers;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.edc.junit.testfixtures.TestUtils;
+import org.eclipse.edc.security.token.jwt.CryptoConverter;
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.stream.Stream;
@@ -61,6 +64,19 @@ class PemParserTest {
                 .isNotNull()
                 .isInstanceOf(PrivateKey.class);
 
+    }
+
+    @Test
+    void foobar() {
+        var pem = """
+                -----BEGIN PUBLIC KEY-----
+                MCowBQYDK2VwAyEAp1WjKW91glk3nGeaHylpq93RMe/PMGIlNFI+8PlNW1U=
+                -----END PUBLIC KEY-----
+                """;
+        var res = (PublicKey) parser.parse(pem).orElseThrow(f -> new RuntimeException(f.getFailureDetail()));
+
+        var jwk = CryptoConverter.createJwk(new KeyPair(res, null), "key-1");
+        System.out.println(jwk.toJSONString());
     }
 
 
