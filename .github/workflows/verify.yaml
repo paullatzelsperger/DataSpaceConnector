@@ -38,6 +38,27 @@ jobs:
       - name: Run Javadoc
         run: ./gradlew javadoc
 
+  Verify-Api-Version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect changeset if version file changed
+        run: |
+          # check if there was a change any of the management API modules
+          apiChanges=$(git diff --name-status main | grep "extension/control-plane/api/management-api" | wc -l | grep -o "[0-9]\+")
+          if [[ $apiChanges == 0 ]]; then
+            exit 0;
+          fi
+          
+          # if so, check if the changeset also contains the `api-version.json` file
+          changes=$(git diff --name-status main... | grep "api-version.json" |  wc -l | grep -o "[0-9]\+")
+          echo "changes: $changes"
+          if [[ $changes < 1 ]]; then
+            echo "::error file=./extensions/common/api/management-api-configuration/src/main/resources/api-version.json,line=1::Bumping the version is required after a change to the Management API"
+            exit 1;
+          fi
+  
+  
   Unit-Tests:
     runs-on: ubuntu-latest
     env:
