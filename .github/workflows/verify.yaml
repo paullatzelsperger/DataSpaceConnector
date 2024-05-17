@@ -1,0 +1,177 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ main, refactor/* ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "CODEOWNERS"
+      - "LICENSE"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Checkstyle:
+    permissions:
+      id-token: write
+      checks: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest checkstyleTestFixtures
+
+  Javadoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Run Javadoc
+        run: ./gradlew javadoc
+
+  Verify-Api-Version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect changeset if version file changed
+        run: |
+          # main branch is not checked out by default
+          git fetch origin main:main
+
+          # check if there was a change any of the management API modules. the last "grep" parses the result of "wc" into a number
+          apiChanges=$(git diff --name-status main | grep "extensions/control-plane/api/management-api" | wc -l | grep -o "[0-9]\+")
+          if [[ $apiChanges = 0 ]]; then
+            echo "There were no changes in the Management API"
+          else 
+            echo "There are $apiChanges changed files in the Management API, will check if api-version.json was modified."
+            # if so, check if the changeset also contains the `api-version.json` file
+            changes=$(git diff --name-status main | grep "api-version.json" |  wc -l | grep -o "[0-9]\+")
+            if [[ $changes < 1 ]]; then
+              echo "::error file=./extensions/common/api/management-api-configuration/src/main/resources/api-version.json,line=1::Bumping the version is required after a change to the Management API"
+              exit 1;
+            fi
+          fi
+  
+  
+  
+  Unit-Tests:
+    runs-on: ubuntu-latest
+    env:
+      JACOCO: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Run unit tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
+        with:
+          command: ./gradlew test jacocoTestReport
+
+  Postgresql-Integration-Tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14.2
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: password
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Postgresql Tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
+        with:
+          command: ./gradlew test -DincludeTags="PostgresqlIntegrationTest"
+
+  End-To-End-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+      - name: End to End Integration Tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
+        with:
+          command: ./gradlew test jacocoTestReport -DincludeTags="EndToEndTest"
+
+  Component-Tests:
+    env:
+      JACOCO: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Component Tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
+        with:
+          command: ./gradlew test jacocoTestReport -DincludeTags="ComponentTest"
+
+  API-Tests:
+    env:
+      JACOCO: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eclipse-edc/.github/.github/actions/setup-build@main
+
+      - name: Component Tests
+        uses: eclipse-edc/.github/.github/actions/run-tests@main
+        with:
+          command: ./gradlew test jacocoTestReport -DincludeTags="ApiTest"
+
+  Upload-Test-Report:
+    needs:
+      - API-Tests
+      - Component-Tests
+      - End-To-End-Tests
+      - Postgresql-Integration-Tests
+      - Unit-Tests
+
+    permissions:
+      checks: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: "**/test-results/**/*.xml"
+
+  Upload-Coverage-Report-To-Codecov:
+    needs:
+      - API-Tests
+      - Unit-Tests
+      - Component-Tests
+      - End-To-End-Tests
+
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      # Sources are needed for Codecov report
+      - uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: CodeCov
+        uses: codecov/codecov-action@v4
