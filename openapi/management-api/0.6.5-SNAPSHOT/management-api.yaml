@@ -1656,6 +1656,19 @@ paths:
                 example: null
                 items:
                   $ref: "#/components/schemas/ApiErrorDetail"
+  /version:
+    get:
+      tags:
+      - Version
+      description: Gets the exact SemVer string of the Management API
+      operationId: getVersion
+      responses:
+        "200":
+          description: The secret
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretOutput"
 components:
   schemas:
     ApiErrorDetail:
